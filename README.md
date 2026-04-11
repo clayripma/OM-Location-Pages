@@ -1,26 +1,29 @@
 # OM Location Pages
 
-A Claude Code skill that generates real estate Offering Memorandum (OM) demographic and market summary pages using VestMap data.
+Generate presentation-ready Offering Memorandum (OM) location pages from any US address using Claude Code and VestMap.
 
-## What it does
+One command. Real data. A polished, self-contained HTML page you can drop into any deal package.
 
-Generates self-contained HTML pages with:
+## What you get
 
-- **Demographics summary** — Population, households, income, age at Block Group / Tract / ZIP levels
-- **Interactive map** — Leaflet with ESRI World Street Map tiles and property pin
-- **Education breakdown** — Attainment levels with percentage distributions
-- **Employment data** — White collar, blue collar, services split with unemployment rate
-- **Income distribution** — Household income brackets with county comparison
-- **Crime & schools** — Crime indices and nearby school ratings
-- **Natural hazards** — FEMA National Risk Index data
-- **Business data** — CBSA-level business and employee counts
+Each page pulls live data from 1,000+ ESRI, AGS, FHFA, FEMA, and US Census GIS fields and renders it into a single HTML file with:
 
-All data is queried live from VestMap / ESRI Demographics 2024. No fabricated numbers.
+- **Demographics** — Population, households, income, median age, and net worth compared across Block Group, Tract, and ZIP
+- **Interactive map** — Leaflet map with ESRI World Street Map tiles pinned to the property
+- **Education** — Attainment distribution from no diploma through graduate degree
+- **Employment** — White collar / blue collar / services breakdown with unemployment rate
+- **Income distribution** — Household income brackets benchmarked against the county
+- **Crime & schools** — AGS Crime Indexes and nearby school ratings
+- **Natural hazards** — FEMA National Risk Index scores for flood, wildfire, earthquake, hurricane, tornado, and 14 other hazard types
+- **Business activity** — CBSA-level business and employee counts
+
+Every number comes from a live VestMap query. Nothing is estimated or fabricated.
 
 ## Requirements
 
 - [Claude Code](https://claude.ai/claude-code)
-- VestMap MCP server configured in your Claude Code settings
+- A VestMap account — [sign up here](https://app.vestmap.com/mcp)
+- VestMap MCP server connected in your Claude Code settings
 
 ## Usage
 
@@ -28,23 +31,17 @@ All data is queried live from VestMap / ESRI Demographics 2024. No fabricated nu
 /om-page
 ```
 
-Provide an address and optionally specify which sections to include, a design to match, or custom data topics.
-
-### Example
+Provide a US address. Optionally specify which sections to include, a design to match, or custom data topics.
 
 ```
 Address: 112-120 E 43rd St, Kansas City, MO 64111
-Sections: all
-Design: vestmap
 ```
 
 ## Methodology
 
-Uses **Block Group / Tract / ZIP Code** geographic levels for all comparisons — never 1/3/5 mile radius. County and State can be added as extra columns on request.
+All comparisons use **Block Group / Tract / ZIP Code** geographic levels — not 1/3/5 mile radius. County and State columns can be added on request.
 
 ## Installation
-
-Clone this repo and the skill will be available when running Claude Code from this directory:
 
 ```bash
 git clone https://github.com/clayripma/om-location-pages.git
@@ -52,4 +49,12 @@ cd om-location-pages
 claude
 ```
 
-Then use `/om-page` to invoke the skill.
+Then run `/om-page` to generate a page.
+
+## About VestMap
+
+VestMap brings nationwide location intelligence to AI agents. Turn any US address into a complete picture of the people, economy, housing market, and risk profile around it — demographics, income and wealth, employment, median rent, home values, FHFA House Price Index trends, crime, schools, growth projections, lifestyle segments, and FEMA natural hazard exposure.
+
+Data is sourced from ESRI, AGS, FHFA, FEMA, and the US Census at every geographic level from block group to national. Use it to build OMs, run site selection, underwrite investments, compare markets, assess climate risk, or answer any location question grounded in current, authoritative data.
+
+[Get a VestMap account](https://app.vestmap.com/mcp)
