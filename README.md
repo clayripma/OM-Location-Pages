@@ -28,7 +28,7 @@ Every number comes from a live VestMap query. Nothing is estimated or fabricated
 ## Usage
 
 ```
-/om-page
+/vestmap-om-pages
 ```
 
 Provide a US address. Optionally specify which sections to include, a design to match, or custom data topics.
@@ -49,7 +49,7 @@ cd om-location-pages
 claude
 ```
 
-Then run `/om-page` to generate a page.
+Then run `/vestmap-om-pages` to generate a page.
 
 ## About VestMap
 

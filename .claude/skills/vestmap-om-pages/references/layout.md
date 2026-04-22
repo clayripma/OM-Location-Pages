@@ -1,0 +1,291 @@
+# OM Page Layout
+
+Visual rules for turning data into a page that reads like an OM — not a dashboard, not a brief. Market-agnostic, PDF-first.
+
+---
+
+## 1. Page Structure
+
+Self-contained HTML → exported to PDF via headless Chrome (§9). Letter-size, vertical. Default: **2 pages** (page 1: Hero + context band + Market Demand; page 2: Population / Income / Housing / Rental / Workforce / Safety). Opt-in modules add page 3+.
+
+```
+┌─ Page 1 ───────────────────────────────────────┐
+│  Hero: address (H1) + locality + submarket     │
+│        + default-on map                         │
+│                                                 │
+│  Context band: HHI Block │ PopGr ZIP │ MSA      │
+│                                                 │
+│  Market Demand panel   (CSV-backed ZIPs only)   │
+└─────────────────────────────────────────────────┘
+┌─ Page 2 ───────────────────────────────────────┐
+│  Population Profile   (4-col)                  │
+│  Income Profile       (4-col)                  │
+│  Housing Values       (4-col)                  │
+│  Rental Market        (4-col)                  │
+│  Workforce            (4-col + stacked bars)   │
+│  Safety / Crime       (ZIP·City·State + block) │
+│                                                 │
+│  Minimal footer (sources + timestamp only)      │
+└─────────────────────────────────────────────────┘
+┌─ Page 3+ (opt-in only) ────────────────────────┐
+│  Risk / Schools / Education / … modules        │
+└─────────────────────────────────────────────────┘
+```
+
+CSS:
+```css
+@page { size: Letter; margin: 0.4in; }
+.page { page-break-after: always; }
+.page:last-of-type { page-break-after: auto; }
+```
+
+---
+
+## 2. Cross-Scale Comparison Visualization (core pattern)
+
+Every 4-scale default section uses the same comparison row.
+
+### Pattern
+
+Each metric = one horizontal strip:
+- Label on the left (~18% of row width)
+- Four equal-width cells: Block → ZIP → City → County (or Block → Tract → ZIP → County for non-CSV ZIPs)
+- One delta chip under each value cell (except the leftmost) showing Δ vs its left neighbor
+
+```
+┌──────────────────┬──────────┬──────────┬──────────┬──────────┐
+│ Median HHI       │  $72.5k  │  $68.2k  │  $65.4k  │  $64.9k  │
+│                  │          │  −$4.3k  │  −$2.8k  │  −$0.5k  │
+│                  │          │  −6.0%   │  −4.1%   │  −0.8%   │
+└──────────────────┴──────────┴──────────┴──────────┴──────────┘
+```
+
+**Chip contents:**
+- Currency: abs Δ in `$` + relative Δ in `%` (e.g., `−$4.3k · −6.0%`)
+- Percentages: `pp` absolute Δ + relative Δ in `%`
+- Counts: abs Δ + `×` ratio
+
+**Chip color:** green for positive Δ, red for negative, neutral gray for `|Δ| < 1%` or `|Δ| < 1pp`. Neutral visual cues only — not value judgments. Do not interpret (R10).
+
+### Omission rules (strict)
+
+- Null value cell → cell `display: none`, its chip dropped (R11)
+- Row with fewer than 2 non-null cells → whole `<tr>` removed from DOM
+- Section with fewer than 2 rows remaining → whole `<section>` removed
+- **NEVER** show `—`, `N/A`, "data unavailable", or similar placeholder text
+- **NEVER** annotate which cells dropped or why
+
+### Scale header
+
+At the top of each 4-col section: `Block · ZIP · City · County` (CSV-backed) or `Block · Tract · ZIP · County` (VestMap-direct). Use the same header across ALL 4-col sections in the same OM — never mix.
+
+---
+
+## 3. Per-Section Layout Patterns
+
+### 3.1 Hero
+
+Top ~2" of page 1.
+
+- Left side: address (H1, 22pt, no eyebrow text), locality line (City, State · County · ZIP), submarket pill (if CSV row has non-null submarket; else omitted).
+- Right side: Leaflet + ESRI hero map (default-on), ~2.5" tall.
+- **Hero must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; opportunity-score badge; SV rank badge; safety label pill. None of these are in the default hero.
+- If geocoding fails, the `.hero__map` div is removed. The hero lays out single-column in that case.
+
+### 3.2 Context band (3 callouts)
+
+Immediately below the hero.
+
+Fixed slot content per `SKILL.md §O7`:
+
+1. **Median HHI · Block** — value: `${{HHI_BLOCK}}`, source: `get_section_data("income").median_household_income.block`
+2. **Pop Growth · ZIP, 5-yr CAGR** — value: `{{POPGR_ZIP}}%`, source: `get_section_data("expansion").zip`
+3. **MSA** — value: `{{MSA_NAME}}` verbatim (full string as returned by the CBSA layer), slightly smaller font (16pt) and 600-weight since MSA names are long strings, not big numbers.
+
+If any slot's underlying data is null, remove that callout cell. The grid auto-widens remaining cells. Never say "data unavailable".
+
+### 3.3 Market Demand (CSV-backed ZIPs only)
+
+Rendered only when subject ZIP has a CSV row. No CSV row → entire section silently absent.
+
+Two-column panel:
+- Left: 3 horizontal bars (real estate, apartments for sale, homes for sale) showing monthly SV.
+- Right: Total monthly SV big number, ZIP demand rank (generic `#N`, no "of 69", no "in KC"), multifamily opportunity score gauge.
+
+### 3.4 Population / Income / Housing / Rental / Workforce
+
+Standard 4-col comparison pattern (§2). Section header with label + scale-header sub-label.
+
+### 3.5 Workforce specifics
+
+Above the stacked bars: 4-col collar-share strip (white-collar % and blue-collar %). Below: one horizontal stacked bar per scale showing Mgmt / Sales / Prod / Cons as normalized segments. If the user opted into "all 13 occupations", swap the 4-bar chart for a 13-segment bar; keep the collar-share strip unchanged.
+
+### 3.6 Safety / Crime
+
+Two sub-blocks, NEVER merged:
+
+- **7a. Crime Index (CSV-backed only)** — 3-col table: ZIP · City · State. Rows: Total, Personal, Property. Two ratio chips: ZIP vs City, ZIP vs State. Safety-label pill omitted per default spec. If `crime_total_index_zip` is null → entire sub-block dropped.
+- **7b. Block Group counts (always attempted)** — 3×3 grid. Hidden cells if null. Per-capita line only if `TOTPOP_CY` at Block returned (R11).
+
+### 3.7 Footer
+
+Last strip of last page. Single line, 9pt, muted color, 0.7 opacity. **Minimal — no audit trail, no failure notes.**
+
+Allowed contents:
+- `Data: VestMap`
+- CSV provenance when applicable: `· CSV row for ZIP NNNNN` (when a CSV row was used)
+- `· Generated YYYY-MM-DD HH:MM`
+
+**Forbidden in the footer:**
+- "Mode A / Mode B"
+- "no CSV row for [city]", "no curated City aggregation"
+- "R13 verified", R13 divergence explanations
+- VestMap call names, layer IDs
+- "Optional modules included: …"
+- Any text that describes which data was missing or which calls failed
+
+---
+
+## 4. Typography
+
+- Font stack: `"Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`. No web-font imports.
+- Address H1: 22pt / 600.
+- Section headers: 16pt → 13pt.
+- Body: 11pt / 400.
+- Big numbers (context band): 28pt / 700, tabular-nums.
+- MSA value (context slot 3): 16pt / 600 (smaller than other callouts since MSA names are multi-word strings).
+- Labels: 10pt / 500, uppercase, letter-spacing 0.04em.
+- 4-col cell values: 14pt / 600, tabular-nums.
+- Chips: 9pt / 500.
+- Footer: 9pt / 400, opacity 0.85.
+
+`font-variant-numeric: tabular-nums` on every numeric cell.
+
+---
+
+## 5. Color
+
+Restrained, market-agnostic palette. Same for every OM.
+
+- **Ink:** `#141414`
+- **Muted:** `#5E5E5E`
+- **Line:** `#E4E4E4`
+- **Surface:** `#FFFFFF`
+- **Surface-alt:** `#F6F6F3`
+- **Accent:** `#2C5F4E`
+- **Caution:** `#A84532` (reserved for crime / risk emphasis)
+- **Chip-pos:** `#E6EFEA` bg / `#1E4D3E` text
+- **Chip-neg:** `#F4E4E0` bg / `#7A2D1F` text
+- **Chip-neu:** `#EDEDE8`
+
+Never add market- or brand-specific colors unless the user supplies them.
+
+---
+
+## 6. Spacing
+
+- Page outer padding: 0.4in (via `@page`).
+- Between sections: 0.22in.
+- Section header → first row: 0.12in.
+- Between 4-col rows: 0.08in.
+- Hero bottom padding: 0.28in.
+
+Never squeeze sections. If overflow, paginate.
+
+---
+
+## 7. Module Layouts (opt-in)
+
+All modules follow the same rules: no placeholder text, R9 omission, R11 gating.
+
+- **Risk (FEMA NRI · Tract):** Page break before. Header: `Natural Hazard Risk · Tract`. 4 callouts (`RISK_SCORE`, `RISK_RATNG`, `SOVI_SCORE`, `RESL_SCORE`) + top 5 hazards by `_RISKS` score. Omit null-rated hazards.
+- **Schools (point-radius):** Header: `Nearest Schools · [District name]`. 3 vertical cards: name, distance, rating, URL. No scale comparison.
+- **Education (5 buckets):** 4-col stacked-bar panel, one bar per scale. 5 segments: No HS / HS / Some College / Bachelor's / Graduate. Monochrome ramp of `--accent`. R11 gated.
+- **Income Distribution (9 HINC buckets):** 4-col stacked-bar, 9 segments per bar. R11 gated.
+- **All 13 occupations:** replaces the default Workforce 4-bar chart.
+- **Business / MSA:** single-row callout: `Metro: [MSA name] · [N01_BUS] businesses · [N01_EMP] employees`.
+- **HPI:** small sparkline or single callout, depending on response shape.
+
+---
+
+## 8. What NOT to do
+
+- **No "Offering Memorandum" eyebrow** or any document-type label above the address. Just the address.
+- **No Tapestry anywhere** — no segment name, no grade pill, no lifestyle callout (R5/O4).
+- **No market-specific hardcoded wording** — no "KC", no "of 69 ZIPs", no city names in template flavor text (O5). Market / city names appear only where they're data-driven from the subject.
+- **No failure notes anywhere in the rendered output** (O2). No "module-note" class. No paragraph saying "X row dropped" or "Y omitted because …". If something's not there, it's silently not there.
+- **No "N/A", "—", "data unavailable"** in empty cells. CSS `display: none` only.
+- **No adjectives / prose claims** ("desirable", "up-and-coming", "affluent", "stable"). R10.
+- **No filler / welcome copy.** Section headers are labels, not marketing.
+- **No client-side JS for data viz.** Stacked bars are CSS `flex-basis` only. The Leaflet map is the ONLY JS on the page.
+- **No sections outside the default list** (unless opt-in module triggered).
+- **No mixing Tract and City** in one OM's columns.
+- **No default palette overrides** without the user asking.
+
+---
+
+## 9. PDF Export (default output)
+
+PDF is the default output of this skill, not HTML. After filling the template:
+
+### Step 1 — Write the HTML
+
+Write the rendered HTML to a temp path (still in the current working directory but with a `.html` suffix):
+
+```
+vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.html
+```
+
+### Step 2 — Convert to PDF with headless Chrome
+
+Use the Chrome binary installed at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. The Bash command:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless \
+  --disable-gpu \
+  --no-pdf-header-footer \
+  --virtual-time-budget=10000 \
+  --print-to-pdf="vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.pdf" \
+  "file:///absolute/path/to/vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.html"
+```
+
+Notes:
+- `--virtual-time-budget=10000` gives Leaflet 10 seconds to load tiles and the map marker before printing. Without this, the map renders blank.
+- `--no-pdf-header-footer` kills Chrome's default "page 1 of N" and URL footer.
+- `--disable-gpu` is required on headless-macOS.
+- Use `file://` scheme with the absolute path, not a relative path.
+
+### Step 3 — Clean up
+
+After the PDF is generated and verified (file exists, non-zero size), delete the intermediate HTML file unless the user explicitly asked for both.
+
+### Step 4 — Output the PDF path
+
+Respond with ONLY:
+- The absolute PDF path
+- One sentence naming the subject address
+
+Do not list which sections rendered. Do not mention which modules were included vs not. Do not apologize for any missing data. See `SKILL.md §O10`.
+
+### Fallback: user asks for HTML-only
+
+If the user says "HTML only" or "no PDF" or similar, skip Step 2–3. Output the HTML path instead.
+
+### Fallback: Chrome not found
+
+If `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` doesn't exist, fall back to HTML-only and tell the user once: "Chrome not found — output is HTML. To produce PDF, open the HTML in a browser and use File → Print → Save as PDF." This is the only case where HTML+instructions replace PDF by default.
+
+---
+
+## 10. Market-agnostic rendering (the KC-removal rule)
+
+Every OM renders identically regardless of market. The layout, colors, typography, spacing, and wording do NOT change based on whether the subject is in KC, Denver, Anchorage, or anywhere else.
+
+The only places a market name appears on the page:
+- The subject address (H1)
+- The locality line (City, State · County · ZIP)
+- The MSA callout in the context band
+- The submarket pill (when CSV row has a non-null submarket — this is data-driven, not hardcoded)
+
+The CSV is a pre-baked data accelerator for ZIPs it covers — it is NOT a "mode" or a market carve-out. Do not label output with "KC", "Mode A", "CSV-backed", etc.
