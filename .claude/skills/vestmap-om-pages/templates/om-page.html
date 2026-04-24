@@ -231,13 +231,9 @@
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    background: var(--neutral-chip);
+    color: var(--muted);
   }
-  .chip--pos { background: var(--chip-pos); color: var(--chip-pos-ink); }
-  .chip--neg { background: var(--chip-neg); color: var(--chip-neg-ink); }
-  .chip--neu { background: var(--neutral-chip); color: var(--muted); }
-  .chip--good { background: var(--chip-pos); color: var(--chip-pos-ink); }
-  .chip--warn { background: #FAEFD6; color: #7A5A1F; }
-  .chip--caution { background: var(--chip-neg); color: var(--chip-neg-ink); }
 
   /* Column headers for the scale (Block · Tract · ZIP · County) */
   .cmp-header {
@@ -451,21 +447,12 @@
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POP_ZIP}}</div>
-            <div class="cmp-cell__chips">
-              <span class="chip chip--{{POP_ZIP_VS_BLOCK_DIR}}">{{POP_ZIP_VS_BLOCK_ABS}} · {{POP_ZIP_VS_BLOCK_RATIO}}</span>
-            </div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POP_CITY}}</div>
-            <div class="cmp-cell__chips">
-              <span class="chip chip--{{POP_CITY_VS_ZIP_DIR}}">{{POP_CITY_VS_ZIP_ABS}} · {{POP_CITY_VS_ZIP_RATIO}}</span>
-            </div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POP_COUNTY}}</div>
-            <div class="cmp-cell__chips">
-              <span class="chip chip--{{POP_COUNTY_VS_CITY_DIR}}">{{POP_COUNTY_VS_CITY_ABS}} · {{POP_COUNTY_VS_CITY_RATIO}}</span>
-            </div>
           </td>
         </tr>
 
@@ -475,15 +462,12 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{MEDAGE_BLOCK}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{MEDAGE_ZIP}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{MEDAGE_ZIP_VS_BLOCK_DIR}}">{{MEDAGE_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{MEDAGE_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{MEDAGE_CITY_VS_ZIP_DIR}}">{{MEDAGE_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{MEDAGE_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{MEDAGE_COUNTY_VS_CITY_DIR}}">{{MEDAGE_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
 
@@ -494,11 +478,9 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{DENS_ZIP}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{DENS_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{DENS_CITY_VS_ZIP_DIR}}">{{DENS_CITY_VS_ZIP_ABS}} · {{DENS_CITY_VS_ZIP_RATIO}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{DENS_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{DENS_COUNTY_VS_CITY_DIR}}">{{DENS_COUNTY_VS_CITY_ABS}} · {{DENS_COUNTY_VS_CITY_RATIO}}</span></div>
           </td>
         </tr>
 
@@ -508,15 +490,12 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{POPGR_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POPGR_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{POPGR_ZIP_VS_BLOCK_DIR}}">{{POPGR_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POPGR_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{POPGR_CITY_VS_ZIP_DIR}}">{{POPGR_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{POPGR_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{POPGR_COUNTY_VS_CITY_DIR}}">{{POPGR_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
 
@@ -526,15 +505,12 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{HHSIZE_BLOCK}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHSIZE_ZIP}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHSIZE_ZIP_VS_BLOCK_DIR}}">{{HHSIZE_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHSIZE_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHSIZE_CITY_VS_ZIP_DIR}}">{{HHSIZE_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHSIZE_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHSIZE_COUNTY_VS_CITY_DIR}}">{{HHSIZE_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
 
@@ -564,15 +540,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">${{HHI_BLOCK}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HHI_ZIP}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHI_ZIP_VS_BLOCK_DIR}}">{{HHI_ZIP_VS_BLOCK_ABS}} · {{HHI_ZIP_VS_BLOCK_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHI_ZIP_VS_BLOCK_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HHI_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHI_CITY_VS_ZIP_DIR}}">{{HHI_CITY_VS_ZIP_ABS}} · {{HHI_CITY_VS_ZIP_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHI_CITY_VS_ZIP_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HHI_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHI_COUNTY_VS_CITY_DIR}}">{{HHI_COUNTY_VS_CITY_ABS}} · {{HHI_COUNTY_VS_CITY_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHI_COUNTY_VS_CITY_PCT}}</span></div>
           </td>
         </tr>
 
@@ -589,15 +565,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{HHIGR_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHIGR_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHIGR_ZIP_VS_BLOCK_DIR}}">{{HHIGR_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHIGR_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHIGR_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHIGR_CITY_VS_ZIP_DIR}}">{{HHIGR_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHIGR_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HHIGR_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HHIGR_COUNTY_VS_CITY_DIR}}">{{HHIGR_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HHIGR_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
 
@@ -614,15 +590,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{UNEMP_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{UNEMP_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{UNEMP_ZIP_VS_BLOCK_DIR}}">{{UNEMP_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{UNEMP_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{UNEMP_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{UNEMP_CITY_VS_ZIP_DIR}}">{{UNEMP_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{UNEMP_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{UNEMP_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{UNEMP_COUNTY_VS_CITY_DIR}}">{{UNEMP_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{UNEMP_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
 
@@ -649,15 +625,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">${{HV_BLOCK}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HV_ZIP}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HV_ZIP_VS_BLOCK_DIR}}">{{HV_ZIP_VS_BLOCK_ABS}} · {{HV_ZIP_VS_BLOCK_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HV_ZIP_VS_BLOCK_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HV_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HV_CITY_VS_ZIP_DIR}}">{{HV_CITY_VS_ZIP_ABS}} · {{HV_CITY_VS_ZIP_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HV_CITY_VS_ZIP_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{HV_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HV_COUNTY_VS_CITY_DIR}}">{{HV_COUNTY_VS_CITY_ABS}} · {{HV_COUNTY_VS_CITY_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HV_COUNTY_VS_CITY_PCT}}</span></div>
           </td>
         </tr>
 
@@ -674,15 +650,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{HVGR_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HVGR_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HVGR_ZIP_VS_BLOCK_DIR}}">{{HVGR_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HVGR_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HVGR_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HVGR_CITY_VS_ZIP_DIR}}">{{HVGR_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HVGR_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{HVGR_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{HVGR_COUNTY_VS_CITY_DIR}}">{{HVGR_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{HVGR_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
       </tbody>
@@ -708,15 +684,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">${{RENT_BLOCK}}</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{RENT_ZIP}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RENT_ZIP_VS_BLOCK_DIR}}">{{RENT_ZIP_VS_BLOCK_ABS}} · {{RENT_ZIP_VS_BLOCK_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RENT_ZIP_VS_BLOCK_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{RENT_CITY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RENT_CITY_VS_ZIP_DIR}}">{{RENT_CITY_VS_ZIP_ABS}} · {{RENT_CITY_VS_ZIP_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RENT_CITY_VS_ZIP_PCT}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">${{RENT_COUNTY}}</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RENT_COUNTY_VS_CITY_DIR}}">{{RENT_COUNTY_VS_CITY_ABS}} · {{RENT_COUNTY_VS_CITY_PCT}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RENT_COUNTY_VS_CITY_PCT}}</span></div>
           </td>
         </tr>
 
@@ -741,15 +717,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{RSHARE_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{RSHARE_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RSHARE_ZIP_VS_BLOCK_DIR}}">{{RSHARE_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RSHARE_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{RSHARE_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RSHARE_CITY_VS_ZIP_DIR}}">{{RSHARE_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RSHARE_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{RSHARE_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{RSHARE_COUNTY_VS_CITY_DIR}}">{{RSHARE_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{RSHARE_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
       </tbody>
@@ -775,15 +751,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{WC_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{WC_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{WC_ZIP_VS_BLOCK_DIR}}">{{WC_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{WC_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{WC_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{WC_CITY_VS_ZIP_DIR}}">{{WC_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{WC_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{WC_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{WC_COUNTY_VS_CITY_DIR}}">{{WC_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{WC_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
         <tr class="cmp-row">
@@ -791,15 +767,15 @@
           <td class="cmp-cell"><div class="cmp-cell__value">{{BC_BLOCK}}%</div></td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{BC_ZIP}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{BC_ZIP_VS_BLOCK_DIR}}">{{BC_ZIP_VS_BLOCK_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{BC_ZIP_VS_BLOCK_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{BC_CITY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{BC_CITY_VS_ZIP_DIR}}">{{BC_CITY_VS_ZIP_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{BC_CITY_VS_ZIP_PP}}</span></div>
           </td>
           <td class="cmp-cell">
             <div class="cmp-cell__value">{{BC_COUNTY}}%</div>
-            <div class="cmp-cell__chips"><span class="chip chip--{{BC_COUNTY_VS_CITY_DIR}}">{{BC_COUNTY_VS_CITY_PP}}</span></div>
+            <div class="cmp-cell__chips"><span class="chip">{{BC_COUNTY_VS_CITY_PP}}</span></div>
           </td>
         </tr>
       </tbody>

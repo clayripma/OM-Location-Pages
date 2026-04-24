@@ -60,12 +60,15 @@ Each metric = one horizontal strip:
 └──────────────────┴──────────┴──────────┴──────────┴──────────┘
 ```
 
-**Chip contents:**
-- Currency: abs Δ in `$` + relative Δ in `%` (e.g., `−$4.3k · −6.0%`)
-- Percentages: `pp` absolute Δ + relative Δ in `%`
-- Counts: abs Δ + `×` ratio
+**Chip contents — one value per cell, one unit per metric type:**
+- Currency / counts: relative Δ only, as a `%` signed (`+61%`, `−18%`). Never abs + rel together.
+- Percentages / rates: absolute Δ in `pp` only, signed (`−8.3 pp`, `+1.9 pp`). `pp` because adding a `%` delta on top of a value that is already a `%` is ambiguous.
 
-**Chip color:** green for positive Δ, red for negative, neutral gray for `|Δ| < 1%` or `|Δ| < 1pp`. Neutral visual cues only — not value judgments. Do not interpret (R10).
+**Chip color — muted only.** Every chip uses the same neutral background (`--neutral-chip`) with muted text (`--muted`). No green, no red. The sign carries the direction; the reader's eye does the interpretation (R10 — no value judgments).
+
+**Presence is mandatory.** Every non-first-column value cell must have a chip. If both the cell's value and its left-neighbor's value are non-null, the chip renders. No skipping.
+
+**Population Profile is the exception.** That section renders raw values only, no chips at all — the four-column spread alone carries the comparison.
 
 ### Omission rules (strict)
 
@@ -219,18 +222,11 @@ Any big-number callout (context-band slots, summary-table values) uses:
 
 Context band becomes 3 of these in a row.
 
-### Chips — locked palette
+### Chips — single style, no variants
 
-| Chip class | When | Background | Text |
-|---|---|---|---|
-| `.chip--pos` | positive delta | `#E6EFEA` | `#1E4D3E` |
-| `.chip--neg` | negative delta | `#F4E4E0` | `#7A2D1F` |
-| `.chip--neu` | `\|Δ\| < 1%` or `< 1pp` | `#EDEDE8` | `#5E5E5E` |
-| `.chip--good` | categorical "below avg" | `#E6EFEA` | `#1E4D3E` |
-| `.chip--warn` | categorical "near avg" | `#FAEFD6` | `#7A5A1F` |
-| `.chip--caution` | categorical "above avg" | `#F4E4E0` | `#7A2D1F` |
+One class: `.chip`. Background `--neutral-chip` (`#EDEDE8`), text `--muted` (`#5E5E5E`). No green, no red, no categorical color-coding. The chip content carries meaning via its signed value (`+61%`, `−8.3 pp`); color adds no information.
 
-Neutral threshold kills the inconsistency where one render paints a 0.3% diff green and the next paints it neutral.
+Consequence: the Population Profile section renders raw values only — no chips. Every other 4-col section (Income, Housing, Rental, Workforce) renders exactly one chip per non-first-column cell, muted, showing `%` for currency/counts or `pp` for rates.
 
 ### Forbidden (prevents drift toward decoration)
 
