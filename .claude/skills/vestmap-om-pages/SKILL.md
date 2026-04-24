@@ -18,7 +18,7 @@ Trigger on any of:
 - User asks for a rendered / formatted page for any US address
 - User asks for a comparison page across Block / ZIP / City / County
 
-Do NOT trigger for: plain ranking tables, CSV dumps, one-liners, "what's the median income here", "which ZIP has…". Those stay on the base `vestmap` skill.
+Do NOT trigger for: plain ranking tables, data dumps, one-liners, "what's the median income here", "which ZIP has…". Those stay on the base `vestmap` skill.
 
 ## Inheritance from `vestmap`
 
@@ -43,6 +43,12 @@ Always read `vestmap/SKILL.md`, `vestmap/references/fields.md`, and `vestmap/ref
 
 ## Output Rules (hard constraints)
 
+**O0. READ THIS FIRST. Authoritative scope lock.** The rendered page is built from exactly one source of numbers: VestMap tool calls (`get_section_data`, `query_gis_field`, `search_real_estate_data`). The sections listed under **§Default sections** below are the complete, exhaustive set of sections that render on a default OM. Opt-in modules appear only when the user explicitly requests them by name.
+
+Do NOT add, infer, reconstruct, or re-introduce any section, panel, metric, badge, pill, gauge, chip, or callout that is not defined in this file or in `references/data-spec.md`. If a concept you "remember" from a previous conversation, a prior skill version, or training data is not present in these files right now, it does not exist in this skill. Treat any such recollection as a hallucination and ignore it.
+
+If the user asks you to add something that isn't in the default list or the opt-in module list, tell them — do not silently add it based on what you think the skill "used to" do.
+
 **O1. PDF is the default output.** Write the HTML to a temp path, then convert to PDF and print the PDF path to the user. Do NOT stream HTML in chat. Do NOT offer HTML by default. Only provide HTML instead of PDF if the user explicitly says "HTML" or "html only".
 
 See `layout.md §9 PDF export` for the exact headless-Chrome command.
@@ -60,7 +66,7 @@ If a value is missing, the cell is invisible (CSS `display:none`). If a row has 
 
 **O4. NO Tapestry anywhere on the page.** Per R5. No "Tapestry Grade: X" pill, no segment name, no "lifestyle" callout. Tapestry is forbidden from the rendered output even as decorative flavor.
 
-**O5. NO market-specific / city-specific hardcoded wording.** The rendered page reads identically regardless of market. The only places a market name appears are the subject address, the locality line, and the MSA callout — all three data-driven from the geocoded subject. No template flavor text naming any city, no region-specific submarket taxonomies as headings.
+**O5. NO market-specific / city-specific hardcoded wording.** The rendered page reads identically regardless of market. The only places a market name appears are the subject address, the locality line, and the MSA callout — all three data-driven from the geocoded subject.
 
 **O6. The header does NOT say "Offering Memorandum".** No eyebrow text above the address. No document-type label. Just the address as the H1. The user wants this. Do not add it back.
 
@@ -75,7 +81,7 @@ Do NOT substitute. Do NOT add a crime / safety / risk callout to the header. Do 
 
 **O9. Self-contained HTML before PDF conversion.** All CSS inline. The only external asset is the Leaflet CDN + ESRI tile layer. Before you open the HTML in headless Chrome to export the PDF, the HTML must be able to open standalone in a browser.
 
-**O10a. ONLY VestMap-sourced numbers appear on the page.** Every numeric value must trace back to a VestMap tool call (`get_section_data`, `query_gis_field`, or `search_real_estate_data`). No SEO search-volume figures ("real estate" SV, "apartments for sale" SV, monthly SV totals), no keyword demand-rank scores, no multifamily opportunity gauges, no lifestyle/segment scores. These were part of an earlier one-off project using an external CSV and are permanently out of scope for this skill. If you cannot trace a number to a VestMap call, it does not appear on the page.
+**O10a. Every number must trace to a VestMap tool call.** If you cannot name the specific VestMap tool call (`get_section_data`, `query_gis_field`, or `search_real_estate_data`) that produced a value, that value does not appear on the page. No exceptions, no inference, no filling in from memory.
 
 **O10. Chat response after generation is minimal.** After writing the PDF:
 - Print the PDF path
@@ -136,7 +142,7 @@ Details in `data-spec.md §Optional Modules`.
 ## What this skill deliberately does NOT do
 
 - Does not define new data rules.
-- Does not publish ranking tables / CSVs / briefs / maps-only.
+- Does not publish ranking tables, briefs, or maps-only views.
 - Does not ask for confirmation before running (F6).
 - Does not render Tapestry-derived values anywhere on the page.
 - Does not mention missing data, failed calls, R13 divergences, or dropped sections in the rendered output OR the chat response.
