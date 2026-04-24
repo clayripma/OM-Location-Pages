@@ -6,16 +6,16 @@ Visual rules for turning data into a page that reads like an OM — not a dashbo
 
 ## 1. Page Structure
 
-Self-contained HTML → exported to PDF via headless Chrome (§9). Letter-size, vertical. Default: **2 pages** (page 1: Hero + context band + Market Demand; page 2: Population / Income / Housing / Rental / Workforce / Safety). Opt-in modules add page 3+.
+Self-contained HTML → exported to PDF via headless Chrome (§9). Letter-size, vertical. Default: **2 pages** (page 1: Header strip + summary/map + context band; page 2: Population / Income / Housing / Rental / Workforce / Safety). Opt-in modules add page 3+.
 
 ```
 ┌─ Page 1 ───────────────────────────────────────┐
-│  Hero: address (H1) + locality + submarket     │
-│        + default-on map                         │
+│  Header strip: LOCATION BRIEF + address        │
+│  (full-bleed --accent band)                    │
+│                                                 │
+│  Summary table │ Map (two-up)                  │
 │                                                 │
 │  Context band: HHI Block │ PopGr ZIP │ MSA      │
-│                                                 │
-│  Market Demand panel   (CSV-backed ZIPs only)   │
 └─────────────────────────────────────────────────┘
 ┌─ Page 2 ───────────────────────────────────────┐
 │  Population Profile   (4-col)                  │
@@ -23,7 +23,7 @@ Self-contained HTML → exported to PDF via headless Chrome (§9). Letter-size, 
 │  Housing Values       (4-col)                  │
 │  Rental Market        (4-col)                  │
 │  Workforce            (4-col + stacked bars)   │
-│  Safety / Crime       (ZIP·City·State + block) │
+│  Safety / Crime       (Block-Group 3×3 grid)   │
 │                                                 │
 │  Minimal footer (sources + timestamp only)      │
 └─────────────────────────────────────────────────┘
@@ -49,7 +49,7 @@ Every 4-scale default section uses the same comparison row.
 
 Each metric = one horizontal strip:
 - Label on the left (~18% of row width)
-- Four equal-width cells: Block → ZIP → City → County (or Block → Tract → ZIP → County for non-CSV ZIPs)
+- Four equal-width cells: Block → Tract → ZIP → County
 - One delta chip under each value cell (except the leftmost) showing Δ vs its left neighbor
 
 ```
@@ -77,20 +77,20 @@ Each metric = one horizontal strip:
 
 ### Scale header
 
-At the top of each 4-col section: `Block · ZIP · City · County` (CSV-backed) or `Block · Tract · ZIP · County` (VestMap-direct). Use the same header across ALL 4-col sections in the same OM — never mix.
+At the top of each 4-col section: `Block · Tract · ZIP · County`. Same header across ALL 4-col sections in every OM.
 
 ---
 
 ## 3. Per-Section Layout Patterns
 
-### 3.1 Hero
+### 3.1 Header strip + summary/map row
 
-Top ~2" of page 1.
+Top of page 1 has two horizontal bands:
 
-- Left side: address (H1, 22pt, no eyebrow text), locality line (City, State · County · ZIP), submarket pill (if CSV row has non-null submarket; else omitted).
-- Right side: Leaflet + ESRI hero map (default-on), ~2.5" tall.
-- **Hero must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; opportunity-score badge; SV rank badge; safety label pill. None of these are in the default hero.
-- If geocoding fails, the `.hero__map` div is removed. The hero lays out single-column in that case.
+1. **Page-header strip** — full-bleed dark-green band (`background: var(--accent)`, `color:#fff`), ~1.4" tall. Contains uppercase label `LOCATION BRIEF` (28pt/700, letter-spacing 0.02em) and, directly below it, the address in 13pt/400 at 85% opacity white. Nothing else. See §Styling.
+2. **Two-up row** — immediately below the header strip: summary table on the left (locality line + any subject-level identifiers the template surfaces), Leaflet + ESRI map on the right in a neutral card. If geocoding fails the `.hero__map` div is removed and the summary card spans both columns.
+
+**Header strip must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; opportunity-score badge; SV rank badge; safety label pill; submarket pill.
 
 ### 3.2 Context band (3 callouts)
 
@@ -104,45 +104,25 @@ Fixed slot content per `SKILL.md §O7`:
 
 If any slot's underlying data is null, remove that callout cell. The grid auto-widens remaining cells. Never say "data unavailable".
 
-### 3.3 Market Demand (CSV-backed ZIPs only)
-
-Rendered only when subject ZIP has a CSV row. No CSV row → entire section silently absent.
-
-Two-column panel:
-- Left: 3 horizontal bars (real estate, apartments for sale, homes for sale) showing monthly SV.
-- Right: Total monthly SV big number, ZIP demand rank (generic `#N`, no "of 69", no "in KC"), multifamily opportunity score gauge.
-
-### 3.4 Population / Income / Housing / Rental / Workforce
+### 3.3 Population / Income / Housing / Rental / Workforce
 
 Standard 4-col comparison pattern (§2). Section header with label + scale-header sub-label.
 
-### 3.5 Workforce specifics
+### 3.4 Workforce specifics
 
 Above the stacked bars: 4-col collar-share strip (white-collar % and blue-collar %). Below: one horizontal stacked bar per scale showing Mgmt / Sales / Prod / Cons as normalized segments. If the user opted into "all 13 occupations", swap the 4-bar chart for a 13-segment bar; keep the collar-share strip unchanged.
 
-### 3.6 Safety / Crime
+### 3.5 Safety / Crime
 
-Two sub-blocks, NEVER merged:
+Block Group raw counts from VestMap: 3×3 grid. Hidden cells if null. Per-capita line only if `TOTPOP_CY` at Block returned (R11). No ZIP/City/State crime-index comparison — VestMap's crime endpoint is Block-Group only.
 
-- **7a. Crime Index (CSV-backed only)** — 3-col table: ZIP · City · State. Rows: Total, Personal, Property. Two ratio chips: ZIP vs City, ZIP vs State. Safety-label pill omitted per default spec. If `crime_total_index_zip` is null → entire sub-block dropped.
-- **7b. Block Group counts (always attempted)** — 3×3 grid. Hidden cells if null. Per-capita line only if `TOTPOP_CY` at Block returned (R11).
-
-### 3.7 Footer
+### 3.6 Footer
 
 Last strip of last page. Single line, 9pt, muted color, 0.7 opacity. **Minimal — no audit trail, no failure notes.**
 
-Allowed contents:
-- `Data: VestMap`
-- CSV provenance when applicable: `· CSV row for ZIP NNNNN` (when a CSV row was used)
-- `· Generated YYYY-MM-DD HH:MM`
+Allowed contents: `Data: VestMap · Generated YYYY-MM-DD HH:MM`. Nothing else.
 
-**Forbidden in the footer:**
-- "Mode A / Mode B"
-- "no CSV row for [city]", "no curated City aggregation"
-- "R13 verified", R13 divergence explanations
-- VestMap call names, layer IDs
-- "Optional modules included: …"
-- Any text that describes which data was missing or which calls failed
+**Forbidden in the footer:** "R13 verified" / R13 divergence explanations, VestMap call names, layer IDs, "Optional modules included: …", any text describing which data was missing or which calls failed.
 
 ---
 
@@ -194,6 +174,75 @@ Never squeeze sections. If overflow, paginate.
 
 ---
 
+## 6a. Styling — the locked visual language
+
+Every rule below is **mandatory**, not aesthetic guidance. Goal: same inputs → same pixels whether the page is rendered by Opus or Sonnet. New tokens: none. New CSS classes: only the two chip classes at the end.
+
+### Page-header strip (replaces the old split-hero)
+
+Top ~1.4" of page 1:
+
+- Full-bleed dark band: `background: var(--accent)`, `color:#fff`.
+- Left-aligned, uppercase label `LOCATION BRIEF`, 28pt / 700, letter-spacing 0.02em.
+- Address line directly below in 13pt / 400, 85% opacity white.
+- Nothing else in the band. No map, no badges, no pill.
+
+The Leaflet map moves into a neutral card to the right of the summary table one row below.
+
+### Section headers
+
+Every section uses the same template:
+
+```
+┌──────────────────────────────────────────┐
+│  SECTION TITLE                           │  ← 11pt / 600, uppercase, --ink
+│ ─────────────                             │  ← 2px --accent rule, ~40% width
+└──────────────────────────────────────────┘
+```
+
+No background fill. No bubble. Remove the current `surface-alt` pill-styled header. This is the single most reused visual on the page — locking it means every section reads the same.
+
+### Tables (`.cmp-table`)
+
+- Remove the per-row border-top. Replace with **zebra striping**: `.cmp-row:nth-child(even) { background: var(--surface-alt); }`.
+- Row height stays at current spacing — zebra alone carries the separation.
+- Label column left-aligned, muted, 10pt uppercase. Value columns right-aligned, 14pt / 600, tabular-nums. Keep the chip row below the value in the same cell.
+- Scale header above each `<table>` uses the same styling as a section header but at 9pt.
+
+### Callouts (big-number cards)
+
+Any big-number callout (context-band slots, summary-table values) uses:
+
+- `background: var(--surface-alt)`, 6px radius.
+- **Left-edge accent bar**: 3px solid `var(--accent)` on the left side only.
+- Padding 14pt / 12pt. Label 9pt uppercase muted. Value 22pt / 700, letter-spacing -0.015em.
+
+Context band becomes 3 of these in a row.
+
+### Chips — locked palette
+
+| Chip class | When | Background | Text |
+|---|---|---|---|
+| `.chip--pos` | positive delta | `#E6EFEA` | `#1E4D3E` |
+| `.chip--neg` | negative delta | `#F4E4E0` | `#7A2D1F` |
+| `.chip--neu` | `\|Δ\| < 1%` or `< 1pp` | `#EDEDE8` | `#5E5E5E` |
+| `.chip--good` | categorical "below avg" | `#E6EFEA` | `#1E4D3E` |
+| `.chip--warn` | categorical "near avg" | `#FAEFD6` | `#7A5A1F` |
+| `.chip--caution` | categorical "above avg" | `#F4E4E0` | `#7A2D1F` |
+
+Neutral threshold kills the inconsistency where one render paints a 0.3% diff green and the next paints it neutral.
+
+### Forbidden (prevents drift toward decoration)
+
+- No gradients. No shadows (the `--line` borders already in use are the only separators).
+- No icons. No SVG decoration beyond the Leaflet marker.
+- No colored dividers beyond the 2px accent rule under section titles.
+- No stat-circle disks.
+- No background tints on rows beyond the zebra rule.
+- No hover / interactive states (this is a print artifact).
+
+---
+
 ## 7. Module Layouts (opt-in)
 
 All modules follow the same rules: no placeholder text, R9 omission, R11 gating.
@@ -212,7 +261,7 @@ All modules follow the same rules: no placeholder text, R9 omission, R11 gating.
 
 - **No "Offering Memorandum" eyebrow** or any document-type label above the address. Just the address.
 - **No Tapestry anywhere** — no segment name, no grade pill, no lifestyle callout (R5/O4).
-- **No market-specific hardcoded wording** — no "KC", no "of 69 ZIPs", no city names in template flavor text (O5). Market / city names appear only where they're data-driven from the subject.
+- **No market-specific hardcoded wording** — no city names in template flavor text (O5). Market / city names appear only where they're data-driven from the subject.
 - **No failure notes anywhere in the rendered output** (O2). No "module-note" class. No paragraph saying "X row dropped" or "Y omitted because …". If something's not there, it's silently not there.
 - **No "N/A", "—", "data unavailable"** in empty cells. CSS `display: none` only.
 - **No adjectives / prose claims** ("desirable", "up-and-coming", "affluent", "stable"). R10.
@@ -278,14 +327,6 @@ If `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` doesn't exist,
 
 ---
 
-## 10. Market-agnostic rendering (the KC-removal rule)
+## 10. Market-agnostic rendering
 
-Every OM renders identically regardless of market. The layout, colors, typography, spacing, and wording do NOT change based on whether the subject is in KC, Denver, Anchorage, or anywhere else.
-
-The only places a market name appears on the page:
-- The subject address (H1)
-- The locality line (City, State · County · ZIP)
-- The MSA callout in the context band
-- The submarket pill (when CSV row has a non-null submarket — this is data-driven, not hardcoded)
-
-The CSV is a pre-baked data accelerator for ZIPs it covers — it is NOT a "mode" or a market carve-out. Do not label output with "KC", "Mode A", "CSV-backed", etc.
+Every OM renders identically regardless of market. Layout, colors, typography, spacing, and wording do not change based on the subject's location. The only places a market name appears on the page are the subject address (H1), the locality line (City, State · County · ZIP), and the MSA callout in the context band — all three data-driven from the geocoded subject.

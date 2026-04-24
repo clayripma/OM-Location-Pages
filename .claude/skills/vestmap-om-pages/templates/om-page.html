@@ -57,67 +57,77 @@
   }
   .page:last-of-type { page-break-after: auto; }
 
-  /* -------- Hero (§3.1) ------------------------------------------------ */
-  .hero {
+  /* -------- Page-header strip (layout.md §Styling) --------------------- */
+  .page-header {
+    margin: calc(-1 * var(--pad-page)) calc(-1 * var(--pad-page)) 0;
+    padding: 0.42in var(--pad-page) 0.32in;
+    background: var(--accent);
+    color: #FFFFFF;
+  }
+  .page-header__label {
+    font-size: 28pt;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.05;
+  }
+  .page-header__address {
+    font-size: 13pt;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 0.10in;
+    line-height: 1.3;
+  }
+
+  /* -------- Summary/map row (two-up) ---------------------------------- */
+  .summary-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.3in;
-    padding-bottom: 0.28in;
-    border-bottom: 1px solid var(--line);
+    gap: 0.24in;
+    margin-top: 0.22in;
   }
-  .hero__meta .eyebrow {
-    font-size: 9pt;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 500;
-    margin-bottom: 0.06in;
-  }
-  .hero__meta h1 {
-    font-size: 22pt;
-    font-weight: 600;
-    margin: 0 0 0.10in 0;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-  }
-  .hero__locality {
-    font-size: 11pt;
-    color: var(--muted);
-    margin-bottom: 0.14in;
-  }
-  .pill {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 999px;
+  .summary-card {
     background: var(--surface-alt);
-    color: var(--ink);
-    font-size: 9pt;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    margin-right: 4px;
-    border: 1px solid var(--line);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+    padding: 14pt 12pt;
   }
-  .pill--accent { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .pill--caution { background: var(--caution); color: #fff; border-color: var(--caution); }
-  /* No safety-label pills in the default hero. */
+  .summary-card__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 10pt;
+  }
+  .summary-card__row + .summary-card__row { border-top: 1px solid var(--line); }
+  .summary-card__row .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 9pt;
+  }
+  .summary-card__row .value { font-weight: 600; font-variant-numeric: tabular-nums; }
 
   .hero__map {
     width: 100%;
-    height: 2.5in;
+    height: 2.6in;
     border-radius: 6px;
     overflow: hidden;
     border: 1px solid var(--line);
   }
 
-  /* -------- Context band (3 big-number callouts) ----------------------- */
+  /* -------- Context band — 3 big-number callouts (left-accent-bar) ----- */
   .context-band {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.15in;
     margin: 0.22in 0;
-    padding: 0.14in 0;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
+  }
+  .context-callout {
+    background: var(--surface-alt);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent);
+    padding: 14pt 12pt;
   }
   .context-callout .label {
     font-size: 9pt;
@@ -127,11 +137,11 @@
     font-weight: 500;
   }
   .context-callout .value {
-    font-size: 28pt;
+    font-size: 22pt;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
     line-height: 1.1;
-    margin-top: 0.04in;
+    margin-top: 0.05in;
   }
   .context-callout .value small {
     font-size: 11pt;
@@ -139,69 +149,6 @@
     color: var(--muted);
     margin-left: 4px;
   }
-
-  /* -------- Market Demand panel (§3.2) --------------------------------- */
-  .demand {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 0.2in;
-    align-items: stretch;
-  }
-  .demand__bars { display: flex; flex-direction: column; gap: 6px; }
-  .demand__bar-row {
-    display: grid;
-    grid-template-columns: 1.2in 1fr 0.5in;
-    align-items: center;
-    font-size: 10pt;
-    gap: 6px;
-  }
-  .demand__bar-row .label { color: var(--muted); }
-  .demand__bar-track {
-    height: 10px;
-    background: var(--surface-alt);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .demand__bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
-  .demand__bar-row .value { font-weight: 600; text-align: right; }
-
-  .demand__sidebar {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: var(--surface-alt);
-    border-radius: 6px;
-    padding: 0.14in;
-  }
-  .demand__big { text-align: left; }
-  .demand__big .label {
-    font-size: 9pt;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .demand__big .value {
-    font-size: 26pt;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-  }
-  .gauge {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 0.10in;
-  }
-  .gauge__track {
-    flex: 1;
-    height: 8px;
-    background: #FFFFFF;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-  }
-  .gauge__fill { height: 100%; background: var(--accent); border-radius: 4px; }
-  .gauge__value { font-weight: 700; font-size: 11pt; min-width: 36px; text-align: right; }
 
   /* -------- Sections (§3) ---------------------------------------------- */
   .section {
@@ -211,16 +158,25 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    background: var(--surface-alt);
-    border-radius: 4px;
-    padding: 6px 10px;
-    margin-bottom: 0.12in;
+    padding: 0 0 4px 0;
+    margin-bottom: 0.08in;
+    position: relative;
+  }
+  .section__header::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 40%;
+    height: 2px;
+    background: var(--accent);
   }
   .section__header h2 {
-    font-size: 13pt;
+    font-size: 11pt;
     font-weight: 600;
     margin: 0;
-    letter-spacing: -0.005em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
   .scale-header {
     font-size: 9pt;
@@ -235,10 +191,7 @@
   .cmp-table col.label { width: 18%; }
   .cmp-table col.cell  { width: 20.5%; }
 
-  .cmp-row {
-    border-top: 1px solid var(--line);
-  }
-  .cmp-row:first-child { border-top: none; }
+  .cmp-row:nth-child(even) { background: var(--surface-alt); }
 
   .cmp-row__label {
     padding: 10px 8px 6px 0;
@@ -282,8 +235,11 @@
   .chip--pos { background: var(--chip-pos); color: var(--chip-pos-ink); }
   .chip--neg { background: var(--chip-neg); color: var(--chip-neg-ink); }
   .chip--neu { background: var(--neutral-chip); color: var(--muted); }
+  .chip--good { background: var(--chip-pos); color: var(--chip-pos-ink); }
+  .chip--warn { background: #FAEFD6; color: #7A5A1F; }
+  .chip--caution { background: var(--chip-neg); color: var(--chip-neg-ink); }
 
-  /* Column headers for the scale (Block · ZIP · City · County) */
+  /* Column headers for the scale (Block · Tract · ZIP · County) */
   .cmp-header {
     display: grid;
     grid-template-columns: 18% repeat(4, 20.5%);
@@ -331,54 +287,7 @@
   .occ-bar__seg--4 { background: #15332A; }
   .occ-bar__seg--muted { background: var(--neutral-chip); color: var(--muted); }
 
-  /* -------- Safety section (§3.5) -------------------------------------- */
-  .safety {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 0.2in;
-  }
-  .safety__table { width: 100%; border-collapse: collapse; }
-  .safety__table th, .safety__table td {
-    padding: 8px 6px;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    border-bottom: 1px solid var(--line);
-  }
-  .safety__table th {
-    text-align: right;
-    font-size: 9pt;
-    color: var(--muted);
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .safety__table th:first-child, .safety__table td:first-child {
-    text-align: left;
-  }
-  .safety__ratios {
-    display: flex;
-    gap: 10px;
-    margin-top: 0.10in;
-  }
-  .safety__ratio-chip {
-    flex: 1;
-    background: var(--surface-alt);
-    border-radius: 6px;
-    padding: 10px;
-    text-align: center;
-  }
-  .safety__ratio-chip .label {
-    font-size: 9pt;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .safety__ratio-chip .value {
-    font-size: 20pt;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
+  /* -------- Safety section (Block-Group raw counts only) -------------- */
   .block-crime {
     background: var(--surface-alt);
     border-radius: 6px;
@@ -441,27 +350,36 @@
 <body>
 
 <!-- =========================================================================
-     PAGE 1 · Hero + Market Demand
-     Fill instructions (layout.md §3.1–3.2):
-     - Set {{ADDRESS}}, {{SUBMARKET}}, {{CITY_STATE}}, {{COUNTY}}, {{ZIP}}
-     - Hero badges: opportunity score + SV rank (Mode A only)
+     PAGE 1 · Page-header strip + summary/map + context band
+     Fill instructions (layout.md §3.1, §Styling):
+     - {{ADDRESS}}, {{CITY_STATE}}, {{COUNTY}}, {{ZIP}}, {{MSA_NAME}}
      - Map: call initHeroMap({{LAT}}, {{LNG}}) at the end
-     - Mode B: remove .demand panel AND the submarket pill
      ========================================================================= -->
 <section class="page">
 
-  <div class="hero">
-    <div class="hero__meta">
-      <!-- NO eyebrow text by default. Do not add "Offering Memorandum", "OM", or any document-type label. -->
-      <h1>{{ADDRESS}}</h1>
-      <div class="hero__locality">
-        {{CITY_STATE}} &middot; {{COUNTY}} &middot; ZIP {{ZIP}}
+  <div class="page-header">
+    <h1 class="page-header__label">Location Brief</h1>
+    <div class="page-header__address">{{ADDRESS}}</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="summary-card__row">
+        <span class="label">Locality</span>
+        <span class="value">{{CITY_STATE}}</span>
       </div>
-
-      <!-- Submarket pill: render only if CSV row has a non-null submarket value (R9). -->
-      <span class="pill">{{SUBMARKET}}</span>
-
-      <!-- NO Tapestry pill, NO "Tapestry Grade", NO lifestyle-segment label anywhere in the hero (R5/O4). -->
+      <div class="summary-card__row">
+        <span class="label">County</span>
+        <span class="value">{{COUNTY}}</span>
+      </div>
+      <div class="summary-card__row">
+        <span class="label">ZIP</span>
+        <span class="value">{{ZIP}}</span>
+      </div>
+      <div class="summary-card__row">
+        <span class="label">MSA</span>
+        <span class="value">{{MSA_NAME}}</span>
+      </div>
     </div>
 
     <div class="hero__map" id="om-hero-map"><!-- Leaflet mounts here (default-on) --></div>
@@ -489,55 +407,6 @@
     </div>
   </div>
 
-  <!-- Market Demand (§3.2) — CSV-backed only. If no CSV row for the subject ZIP, DROP this entire <section>. -->
-  <section class="section">
-    <div class="section__header">
-      <h2>Market Demand</h2>
-      <span class="scale-header">ZIP-level &middot; monthly search volume</span>
-    </div>
-
-    <div class="demand">
-      <div class="demand__bars">
-        <div class="demand__bar-row">
-          <span class="label">"real estate"</span>
-          <div class="demand__bar-track"><div class="demand__bar-fill" style="width: {{SV_RE_PCT}}%"></div></div>
-          <span class="value">{{SV_RE}}</span>
-        </div>
-        <div class="demand__bar-row">
-          <span class="label">"apartments for sale"</span>
-          <div class="demand__bar-track"><div class="demand__bar-fill" style="width: {{SV_APT_PCT}}%"></div></div>
-          <span class="value">{{SV_APT}}</span>
-        </div>
-        <div class="demand__bar-row">
-          <span class="label">"homes for sale"</span>
-          <div class="demand__bar-track"><div class="demand__bar-fill" style="width: {{SV_HOMES_PCT}}%"></div></div>
-          <span class="value">{{SV_HOMES}}</span>
-        </div>
-      </div>
-
-      <div class="demand__sidebar">
-        <div class="demand__big">
-          <div class="label">Total monthly SV</div>
-          <div class="value">{{TOTAL_SV}}</div>
-        </div>
-        <div class="demand__big">
-          <!-- Generic ZIP rank label — NO market-specific wording (no "KC", no "of 69", etc.). -->
-          <div class="label">ZIP demand rank</div>
-          <div class="value">#{{SV_RANK}}</div>
-        </div>
-        <div>
-          <div class="label" style="font-size:9pt;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);">
-            Multifamily Opportunity Score
-          </div>
-          <div class="gauge">
-            <div class="gauge__track"><div class="gauge__fill" style="width: {{OPP_SCORE}}%"></div></div>
-            <div class="gauge__value">{{OPP_SCORE}}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
 </section>
 
 <!-- =========================================================================
@@ -557,14 +426,14 @@
   <section class="section">
     <div class="section__header">
       <h2>Population Profile</h2>
-      <span class="scale-header">Block · ZIP · City · County</span>
+      <span class="scale-header">Block · Tract · ZIP · County</span>
     </div>
 
     <div class="cmp-header">
       <div>Metric</div>
       <div>Block</div>
+      <div>Tract</div>
       <div>ZIP</div>
-      <div>City</div>
       <div>County</div>
     </div>
 
@@ -677,11 +546,11 @@
   <section class="section">
     <div class="section__header">
       <h2>Income Profile</h2>
-      <span class="scale-header">Block · ZIP · City · County</span>
+      <span class="scale-header">Block · Tract · ZIP · County</span>
     </div>
 
     <div class="cmp-header">
-      <div>Metric</div><div>Block</div><div>ZIP</div><div>City</div><div>County</div>
+      <div>Metric</div><div>Block</div><div>Tract</div><div>ZIP</div><div>County</div>
     </div>
 
     <table class="cmp-table">
@@ -765,11 +634,11 @@
   <section class="section">
     <div class="section__header">
       <h2>Housing Values</h2>
-      <span class="scale-header">Block · ZIP · City · County</span>
+      <span class="scale-header">Block · Tract · ZIP · County</span>
     </div>
 
     <div class="cmp-header">
-      <div>Metric</div><div>Block</div><div>ZIP</div><div>City</div><div>County</div>
+      <div>Metric</div><div>Block</div><div>Tract</div><div>ZIP</div><div>County</div>
     </div>
 
     <table class="cmp-table">
@@ -824,11 +693,11 @@
   <section class="section">
     <div class="section__header">
       <h2>Rental Market</h2>
-      <span class="scale-header">Block · ZIP · City · County</span>
+      <span class="scale-header">Block · Tract · ZIP · County</span>
     </div>
 
     <div class="cmp-header">
-      <div>Metric</div><div>Block</div><div>ZIP</div><div>City</div><div>County</div>
+      <div>Metric</div><div>Block</div><div>Tract</div><div>ZIP</div><div>County</div>
     </div>
 
     <table class="cmp-table">
@@ -891,12 +760,12 @@
   <section class="section">
     <div class="section__header">
       <h2>Workforce</h2>
-      <span class="scale-header">Block · ZIP · City · County</span>
+      <span class="scale-header">Block · Tract · ZIP · County</span>
     </div>
 
     <!-- Collar share 4-col strip (§3.4 top) -->
     <div class="cmp-header">
-      <div>Share</div><div>Block</div><div>ZIP</div><div>City</div><div>County</div>
+      <div>Share</div><div>Block</div><div>Tract</div><div>ZIP</div><div>County</div>
     </div>
     <table class="cmp-table">
       <colgroup><col class="label"/><col class="cell"/><col class="cell"/><col class="cell"/><col class="cell"/></colgroup>
@@ -948,7 +817,7 @@
         </div>
       </div>
       <div class="occ-bar-row">
-        <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">ZIP</span>
+        <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">Tract</span>
         <div class="occ-bar">
           <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_ZIP_PCT}}%">Mgmt {{OCC_MGMT_ZIP_PCT}}%</div>
           <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_ZIP_PCT}}%">Sales {{OCC_SALE_ZIP_PCT}}%</div>
@@ -957,7 +826,7 @@
         </div>
       </div>
       <div class="occ-bar-row">
-        <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">City</span>
+        <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">ZIP</span>
         <div class="occ-bar">
           <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_CITY_PCT}}%">Mgmt {{OCC_MGMT_CITY_PCT}}%</div>
           <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_CITY_PCT}}%">Sales {{OCC_SALE_CITY_PCT}}%</div>
@@ -977,90 +846,40 @@
     </div>
   </section>
 
-  <!-- ========== Safety / Crime (§3.5) =================================== -->
-  <!-- Mode A: full 7a + 7b. Mode B: REMOVE .safety__index column, keep block-crime only. -->
+  <!-- ========== Safety / Crime ========================================== -->
   <section class="section">
     <div class="section__header">
       <h2>Safety</h2>
-      <span class="scale-header">ZIP · City · State indices + Block Group counts</span>
+      <span class="scale-header">Block Group · offense counts</span>
     </div>
 
-    <div class="safety">
-
-      <!-- 7a: Crime Index comparison (Mode A only; drop entire .safety__index in Mode B) -->
-      <div class="safety__index">
-        <table class="safety__table">
-          <thead>
-            <tr>
-              <th>Index</th><th>ZIP</th><th>City</th><th>State</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Total</td>
-              <td>{{CRIME_TOT_ZIP}}</td>
-              <td>{{CRIME_TOT_CITY}}</td>
-              <td>{{CRIME_TOT_STATE}}</td>
-            </tr>
-            <tr>
-              <td>Personal</td>
-              <td>{{CRIME_PER_ZIP}}</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Property</td>
-              <td>{{CRIME_PROP_ZIP}}</td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="safety__ratios">
-          <div class="safety__ratio-chip">
-            <div class="label">ZIP vs City</div>
-            <div class="value">{{CRIME_RATIO_CITY}}×</div>
-          </div>
-          <div class="safety__ratio-chip">
-            <div class="label">ZIP vs State</div>
-            <div class="value">{{CRIME_RATIO_STATE}}×</div>
-          </div>
-        </div>
+    <div class="block-crime">
+      <h3>Block Group · 2024 offense counts</h3>
+      <div class="block-crime__grid">
+        <div class="block-crime__cell"><div class="label">Total</div><div class="value">{{CRMCYTOTC}}</div></div>
+        <div class="block-crime__cell"><div class="label">Property</div><div class="value">{{CRMCYPROC}}</div></div>
+        <div class="block-crime__cell"><div class="label">Personal</div><div class="value">{{CRMCYPERC}}</div></div>
+        <div class="block-crime__cell"><div class="label">Murder</div><div class="value">{{CRMCYMURD}}</div></div>
+        <div class="block-crime__cell"><div class="label">Rape</div><div class="value">{{CRMCYRAPE}}</div></div>
+        <div class="block-crime__cell"><div class="label">Robbery</div><div class="value">{{CRMCYROBB}}</div></div>
+        <div class="block-crime__cell"><div class="label">Assault</div><div class="value">{{CRMCYASST}}</div></div>
+        <div class="block-crime__cell"><div class="label">Burglary</div><div class="value">{{CRMCYBURG}}</div></div>
+        <div class="block-crime__cell"><div class="label">Larceny</div><div class="value">{{CRMCYLARC}}</div></div>
       </div>
-
-      <!-- 7b: Block Group raw counts (always attempted, even in Mode B) -->
-      <div class="block-crime">
-        <h3>Block Group · 2024 offense counts</h3>
-        <div class="block-crime__grid">
-          <div class="block-crime__cell"><div class="label">Total</div><div class="value">{{CRMCYTOTC}}</div></div>
-          <div class="block-crime__cell"><div class="label">Property</div><div class="value">{{CRMCYPROC}}</div></div>
-          <div class="block-crime__cell"><div class="label">Personal</div><div class="value">{{CRMCYPERC}}</div></div>
-          <div class="block-crime__cell"><div class="label">Murder</div><div class="value">{{CRMCYMURD}}</div></div>
-          <div class="block-crime__cell"><div class="label">Rape</div><div class="value">{{CRMCYRAPE}}</div></div>
-          <div class="block-crime__cell"><div class="label">Robbery</div><div class="value">{{CRMCYROBB}}</div></div>
-          <div class="block-crime__cell"><div class="label">Assault</div><div class="value">{{CRMCYASST}}</div></div>
-          <div class="block-crime__cell"><div class="label">Burglary</div><div class="value">{{CRMCYBURG}}</div></div>
-          <div class="block-crime__cell"><div class="label">Larceny</div><div class="value">{{CRMCYLARC}}</div></div>
-        </div>
-        <!-- Optional per-capita line (R11 gated — include only if TOTPOP_CY at Block returned) -->
-        <div style="margin-top:0.10in;font-size:9pt;color:var(--muted);">
-          Per 1,000 residents (Block pop {{POP_BLOCK}}): <strong>{{CRIME_PER_1K}}</strong>
-        </div>
+      <div style="margin-top:0.10in;font-size:9pt;color:var(--muted);">
+        Per 1,000 residents (Block pop {{POP_BLOCK}}): <strong>{{CRIME_PER_1K}}</strong>
       </div>
-
     </div>
   </section>
 
-  <!-- ========== Footer (§3.6) ===========================================
+  <!-- ========== Footer ==================================================
        MINIMAL footer. NEVER list missing fields, failed calls, R13 divergences,
-       "no data available" notes, "dropped", "omitted", "Mode A/B", or which
-       modules were excluded. The user explicitly forbids surfacing failure
-       information in the rendered output.
-       Allowed contents: data provenance line (VestMap / CSV row ZIP) + timestamp.
-       That's it. -->
+       "no data available" notes, "dropped", "omitted", or which modules were
+       excluded. The user explicitly forbids surfacing failure information in
+       the rendered output.
+       Allowed contents: data provenance + timestamp. That's it. -->
   <footer class="om-footer">
-    Data: VestMap &middot; {{CSV_PROVENANCE}} &middot; Generated {{GENERATED_AT}}.
+    Data: VestMap &middot; Generated {{GENERATED_AT}}.
   </footer>
 
 </section>
