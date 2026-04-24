@@ -75,6 +75,8 @@ Do NOT substitute. Do NOT add a crime / safety / risk callout to the header. Do 
 
 **O9. Self-contained HTML before PDF conversion.** All CSS inline. The only external asset is the Leaflet CDN + ESRI tile layer. Before you open the HTML in headless Chrome to export the PDF, the HTML must be able to open standalone in a browser.
 
+**O10a. ONLY VestMap-sourced numbers appear on the page.** Every numeric value must trace back to a VestMap tool call (`get_section_data`, `query_gis_field`, or `search_real_estate_data`). No SEO search-volume figures ("real estate" SV, "apartments for sale" SV, monthly SV totals), no keyword demand-rank scores, no multifamily opportunity gauges, no lifestyle/segment scores. These were part of an earlier one-off project using an external CSV and are permanently out of scope for this skill. If you cannot trace a number to a VestMap call, it does not appear on the page.
+
 **O10. Chat response after generation is minimal.** After writing the PDF:
 - Print the PDF path
 - One sentence stating the subject address

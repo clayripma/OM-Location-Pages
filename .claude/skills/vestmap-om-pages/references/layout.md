@@ -90,7 +90,7 @@ Top of page 1 has two horizontal bands:
 1. **Page-header strip** — full-bleed dark-green band (`background: var(--accent)`, `color:#fff`), ~1.4" tall. Contains uppercase label `LOCATION BRIEF` (28pt/700, letter-spacing 0.02em) and, directly below it, the address in 13pt/400 at 85% opacity white. Nothing else. See §Styling.
 2. **Two-up row** — immediately below the header strip: summary table on the left (locality line + any subject-level identifiers the template surfaces), Leaflet + ESRI map on the right in a neutral card. If geocoding fails the `.hero__map` div is removed and the summary card spans both columns.
 
-**Header strip must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; opportunity-score badge; SV rank badge; safety label pill; submarket pill.
+**Header strip must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; safety label pill; submarket pill.
 
 ### 3.2 Context band (3 callouts)
 

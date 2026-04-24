@@ -16,7 +16,7 @@ Top of page. No cross-scale comparison.
 | City, State · County · ZIP (locality line) | geocode lookup | |
 | Map | Leaflet + ESRI tile layer | **Default-on.** Remove the `.hero__map` div only if geocoding fails. |
 
-Not on the hero: Tapestry pill, opportunity score badge, SV rank badge, safety pill, submarket pill. None of these are in the header by default.
+Not on the hero: Tapestry pill, safety pill, submarket pill. None of these are in the header by default.
 
 ---
 
