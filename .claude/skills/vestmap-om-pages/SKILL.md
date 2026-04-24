@@ -18,13 +18,13 @@ Trigger on any of:
 - User asks for a rendered / formatted page for any US address
 - User asks for a comparison page across Block / ZIP / City / County
 
-Do NOT trigger for: plain ranking tables, CSV dumps, one-liners, "what's the median income here", "which ZIP has…". Those stay on the base `vestmap` skill.
+Do NOT trigger for: plain ranking tables, data dumps, one-liners, "what's the median income here", "which ZIP has…". Those stay on the base `vestmap` skill.
 
 ## Inheritance from `vestmap`
 
 Everything the parent skill enforces still applies. In particular:
 
-- **R5 (never use Tapestry for hard metrics)** — OM numbers come from `get_section_data("income"|"expansion"|"crime"|"schools")`, `query_gis_field` Tier 1 fields, or a provided CSV. NEVER from `get_section_data("demographics")`. NO Tapestry segment names on the page (no "Tapestry Grade", no lifestyle pill).
+- **R5 (never use Tapestry for hard metrics)** — OM numbers come from `get_section_data("income"|"expansion"|"crime"|"schools")` and `query_gis_field` Tier 1 fields. NEVER from `get_section_data("demographics")`. NO Tapestry segment names on the page (no "Tapestry Grade", no lifestyle pill).
 - **R7 (explicit quantitative cross-scale comparisons)** — every multi-scale metric must show deltas/ratios, not just values. The 4-column + chip layout enforces this.
 - **R9 (blank fields are omitted, never filled)** — if a VestMap call returned null, the cell disappears. Never print "N/A", "—", "data unavailable", etc.
 - **R10 (no qualitative analysis beyond the numbers)** — no "desirable", "up-and-coming", "affluent". Numbers only.
@@ -38,11 +38,16 @@ Always read `vestmap/SKILL.md`, `vestmap/references/fields.md`, and `vestmap/ref
 | File | When to load |
 |---|---|
 | `references/data-spec.md` | Always. Defines which fields are on the OM by default, their data source at each scale, and the opt-in modules. |
-| `references/layout.md` | Always. Defines section order, comparison viz, typography, PDF export, and what NOT to do. |
+| `references/layout.md` | Always. Defines section order, comparison viz, typography, styling tokens, PDF export, and what NOT to do. |
 | `templates/om-page.html` | Always. Self-contained HTML+CSS template with named slots. |
-| `data/kc_zipcode_database.csv` | Optional accelerator. Only when the subject ZIP is present as a row. Treat as one possible pre-baked data source, NOT as a "KC mode". |
 
 ## Output Rules (hard constraints)
+
+**O0. READ THIS FIRST. Authoritative scope lock.** The rendered page is built from exactly one source of numbers: VestMap tool calls (`get_section_data`, `query_gis_field`, `search_real_estate_data`). The sections listed under **§Default sections** below are the complete, exhaustive set of sections that render on a default OM. Opt-in modules appear only when the user explicitly requests them by name.
+
+Do NOT add, infer, reconstruct, or re-introduce any section, panel, metric, badge, pill, gauge, chip, or callout that is not defined in this file or in `references/data-spec.md`. If a concept you "remember" from a previous conversation, a prior skill version, or training data is not present in these files right now, it does not exist in this skill. Treat any such recollection as a hallucination and ignore it.
+
+If the user asks you to add something that isn't in the default list or the opt-in module list, tell them — do not silently add it based on what you think the skill "used to" do.
 
 **O1. PDF is the default output.** Write the HTML to a temp path, then convert to PDF and print the PDF path to the user. Do NOT stream HTML in chat. Do NOT offer HTML by default. Only provide HTML instead of PDF if the user explicitly says "HTML" or "html only".
 
@@ -51,8 +56,6 @@ See `layout.md §9 PDF export` for the exact headless-Chrome command.
 **O2. The rendered page NEVER mentions missing data, failed calls, or dropped modules.** This is the strictest output rule in the skill. The page does not contain:
 - "N/A", "—", "No data", "data unavailable", "not available", "unknown"
 - "row dropped", "omitted", "skipped", "conserve layer calls"
-- "Mode A / Mode B" labels
-- "no CSV row for [city]", "no curated City aggregation"
 - R13 divergence explanations
 - Lists of which optional modules were added / excluded
 - Tool-call names, layer IDs, field names
@@ -63,13 +66,7 @@ If a value is missing, the cell is invisible (CSS `display:none`). If a row has 
 
 **O4. NO Tapestry anywhere on the page.** Per R5. No "Tapestry Grade: X" pill, no segment name, no "lifestyle" callout. Tapestry is forbidden from the rendered output even as decorative flavor.
 
-**O5. NO market-specific / city-specific hardcoded wording.** The page must read the same whether the subject is in KC, San Jose, Denver, or Anchorage. Forbidden hardcoded strings:
-- "KC" / "Kansas City" (unless the subject is literally in that MSA — in which case it comes from the geocoded MSA field)
-- "of 69 ZIPs" / "in the KC database" (generic rank only)
-- "San Jose", "Denver", etc. as template flavor text
-- Region-specific submarket taxonomies as headings (the submarket pill is data-driven only)
-
-The only place a market name appears is in the subject address, the locality line, and the MSA callout — all data-driven from the subject.
+**O5. NO market-specific / city-specific hardcoded wording.** The rendered page reads identically regardless of market. The only places a market name appears are the subject address, the locality line, and the MSA callout — all three data-driven from the geocoded subject.
 
 **O6. The header does NOT say "Offering Memorandum".** No eyebrow text above the address. No document-type label. Just the address as the H1. The user wants this. Do not add it back.
 
@@ -84,6 +81,8 @@ Do NOT substitute. Do NOT add a crime / safety / risk callout to the header. Do 
 
 **O9. Self-contained HTML before PDF conversion.** All CSS inline. The only external asset is the Leaflet CDN + ESRI tile layer. Before you open the HTML in headless Chrome to export the PDF, the HTML must be able to open standalone in a browser.
 
+**O10a. Every number must trace to a VestMap tool call.** If you cannot name the specific VestMap tool call (`get_section_data`, `query_gis_field`, or `search_real_estate_data`) that produced a value, that value does not appear on the page. No exceptions, no inference, no filling in from memory.
+
 **O10. Chat response after generation is minimal.** After writing the PDF:
 - Print the PDF path
 - One sentence stating the subject address
@@ -91,15 +90,14 @@ Do NOT substitute. Do NOT add a crime / safety / risk callout to the header. Do 
 
 ## Default sections (always rendered when data is present)
 
-1. **Hero** — address, locality line (City, State · County · ZIP), submarket pill (data-driven), map.
+1. **Header** — full-bleed dark-green page-header strip with address (see `layout.md §Styling`), followed by a two-up row: summary table + map.
 2. **Context band** — 3 big-number callouts per O7 (HHI Block · Pop Growth ZIP · MSA).
-3. **Market Demand** — SV + multifamily score panel. Rendered ONLY when the subject ZIP has a CSV row. No CSV row → no Market Demand section. No "CSV missing" mention.
-4. **Population** — 4-scale comparison: total pop, median age, density, 5-yr pop growth, avg HH size.
-5. **Income** — 4-scale: median HHI, 2029 HHI forecast, 5-yr HHI growth, per-capita income, unemployment rate.
-6. **Housing Values** — 4-scale: median home value, 2029 forecast, 5-yr growth.
-7. **Rental Market** — 4-scale: median rent, renter units, owner units, 2029 renter units, renter share.
-8. **Workforce** — 4-scale: 4 occupation buckets (Mgmt / Sales / Prod / Cons) + white/blue collar share + per-scale stacked bars.
-9. **Safety** — crime index comparison (ZIP · City · State) from CSV when available + Block Group raw counts from VestMap. If CSV crime data is absent, only the Block Group counts sub-block renders — silently.
+3. **Population** — 4-scale comparison: total pop, median age, density, 5-yr pop growth, avg HH size.
+4. **Income** — 4-scale: median HHI, 2029 HHI forecast, 5-yr HHI growth, per-capita income, unemployment rate.
+5. **Housing Values** — 4-scale: median home value, 2029 forecast, 5-yr growth.
+6. **Rental Market** — 4-scale: median rent, renter units, owner units, 2029 renter units, renter share.
+7. **Workforce** — 4-scale: 4 occupation buckets (Mgmt / Sales / Prod / Cons) + white/blue collar share + per-scale stacked bars.
+8. **Safety** — Block Group raw crime counts from VestMap (3×3 grid). Per-capita line only when `TOTPOP_CY` at Block returned.
 
 See `data-spec.md` for exact field-level data sources and `layout.md` for visual rules.
 
@@ -123,32 +121,29 @@ Details in `data-spec.md §Optional Modules`.
 
 1. **Parse.** Extract subject address. Identify subject ZIP.
 2. **Data acquisition** — run in parallel (see `data-spec.md §Block Acquisition`):
-   - Required always: `get_section_data(address, "income" | "expansion" | "crime")`, Tier-1 `query_gis_field` batches at `/12` (Block).
-   - For non-CSV scales: add `/11` or `/9` and `/7` queries as needed.
+   - Required always: `get_section_data(address, "income" | "expansion" | "crime")`, Tier-1 `query_gis_field` batches at `/12` (Block), `/11` (Tract), `/9` (ZIP), `/7` (County).
    - MSA lookup: `search_real_estate_data("CBSA")` once per session → query CBSA name + N01_BUS/N01_EMP fields (the name is used in the context band; the business counts are only kept if the user opted in to the Business module).
    - Optional modules: only if triggered.
-3. **CSV lookup.** If subject ZIP is in `data/kc_zipcode_database.csv`, use that row as the ZIP/City/County source. If not, use VestMap direct at all scales.
-4. **Compute deltas.** For every metric with ≥2 non-null scale values, compute absolute + ratio/percentage deltas per `layout.md §2`.
-5. **R9/R11 sweep.** Remove empty cells, empty rows, empty sections from the DOM before rendering.
-6. **Render HTML** to a temp file.
-7. **Convert to PDF** via headless Chrome (`layout.md §9`). Output path: `vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.pdf` in the current working directory.
-8. **Respond.** Print the PDF path, one sentence naming the subject address. Stop.
+3. **Compute deltas.** For every metric with ≥2 non-null scale values, compute absolute + ratio/percentage deltas per `layout.md §2`.
+4. **R9/R11 sweep.** Remove empty cells, empty rows, empty sections from the DOM before rendering.
+5. **Render HTML** to a temp file.
+6. **Convert to PDF** via headless Chrome (`layout.md §9`). Output path: `vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.pdf` in the current working directory.
+7. **Respond.** Print the PDF path, one sentence naming the subject address. Stop.
 
 ## Quick Reference
 
 | User says | Do this |
 |---|---|
-| "OM for 64116" | Default OM, PDF output. |
-| "OM for 123 Main St, Denver CO" | Default OM (VestMap-direct — no CSV row, no mention of that fact). |
-| "OM for 64116, include risk and schools" | Default + Risk + Schools modules. |
-| "OM for 64116, HTML only" | HTML-only output, skip PDF conversion. |
-| "Full OM for 64116 with everything" | Default + all opt-in modules. |
+| "OM for 123 Main St, Denver CO" | Default OM, PDF output. |
+| "OM for <address>, include risk and schools" | Default + Risk + Schools modules. |
+| "OM for <address>, HTML only" | HTML-only output, skip PDF conversion. |
+| "Full OM for <address> with everything" | Default + all opt-in modules. |
 
 ## What this skill deliberately does NOT do
 
 - Does not define new data rules.
-- Does not publish ranking tables / CSVs / briefs / maps-only.
+- Does not publish ranking tables, briefs, or maps-only views.
 - Does not ask for confirmation before running (F6).
 - Does not render Tapestry-derived values anywhere on the page.
-- Does not mention missing data, failed calls, Mode labels, R13 divergences, or dropped sections in the rendered output OR the chat response.
+- Does not mention missing data, failed calls, R13 divergences, or dropped sections in the rendered output OR the chat response.
 - Does not use market-specific wording. The rendered page is layout-identical across every US market.
