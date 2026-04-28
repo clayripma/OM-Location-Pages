@@ -38,6 +38,7 @@ Always read `vestmap/SKILL.md`, `vestmap/references/fields.md`, and `vestmap/ref
 | File | When to load |
 |---|---|
 | `references/data-spec.md` | Always. Defines which fields are on the OM by default, their data source at each scale, and the opt-in modules. |
+| `references/fields-manifest.md` | Always. Frozen, validated list of every field the default OM uses, scoped to the layer where it's verified queryable. Source of truth for field names — `data-spec.md` references it. Custom mode is not constrained by the manifest. |
 | `references/layout.md` | Always. Defines section order, comparison viz, typography, styling tokens, PDF export, and what NOT to do. |
 | `templates/om-page.html` | Always. Self-contained HTML+CSS template with named slots. |
 
@@ -121,14 +122,78 @@ Details in `data-spec.md §Optional Modules`.
 
 1. **Parse.** Extract subject address. Identify subject ZIP.
 2. **Data acquisition** — run in parallel (see `data-spec.md §Block Acquisition`):
-   - Required always: `get_section_data(address, "income" | "expansion" | "crime")`, Tier-1 `query_gis_field` batches at `/12` (Block), `/11` (Tract), `/9` (ZIP), `/7` (County).
-   - MSA lookup: `search_real_estate_data("CBSA")` once per session → query CBSA name + N01_BUS/N01_EMP fields (the name is used in the context band; the business counts are only kept if the user opted in to the Business module).
+   - Required always: `get_section_data(address, "income" | "expansion" | "crime")`, plus per-scale `query_gis_field` calls at `/12` (Block), `/11` (Tract), `/9` (ZIP), `/7` (County).
+   - **Field names come from `references/fields-manifest.md`.** Any field not listed in the manifest requires a `search_real_estate_data` discovery step before its first `query_gis_field` — never guess Esri field names from memory or training data. This is how stale names like the deprecated `MEDRENT_CY` get caught before they poison a batch.
+   - MSA lookup: `search_real_estate_data("Metropolitan Statistical Area")` once per session → query CBSA name (verbatim) + N01_BUS/N01_EMP fields (name used in the context band; business counts only kept if the user opted in to the Business module).
    - Optional modules: only if triggered.
+   - **Poison-pill recovery is automatic.** If any `query_gis_field` batch returns "No data found", run the per-field probe fallback in `data-spec.md §Block Acquisition Step 2`. Do not bisect manually. Do not surface the failure.
 3. **Compute deltas.** For every metric with ≥2 non-null scale values, compute absolute + ratio/percentage deltas per `layout.md §2`.
 4. **R9/R11 sweep.** Remove empty cells, empty rows, empty sections from the DOM before rendering.
 5. **Render HTML** to a temp file.
 6. **Convert to PDF** via headless Chrome (`layout.md §9`). Output path: `vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.pdf` in the current working directory.
 7. **Respond.** Print the PDF path, one sentence naming the subject address. Stop.
+
+## Gotchas
+
+**`query_gis_field` is all-or-nothing on the field list.**
+
+- One bad field name (or one null returned value) causes the **entire**
+  call to return `"No data found at … may be outside this layer's
+  coverage area."`
+- That message is **not** a coverage error. Coverage errors return the
+  same string. Treat it as ambiguous.
+- Mitigation:
+  1. Keep field names in `references/fields-manifest.md` and treat that
+     file as the source of truth. Don't inline new field names.
+  2. New fields require a `search_real_estate_data` discovery step before
+     their first `query_gis_field` call.
+  3. On any "No data found" response, the acquisition recipe runs a
+     per-field probe fallback in parallel (one call per field). Drop
+     fields that probe null. Never bisect manually, never surface the
+     failure to chat or to the page (O2).
+
+This applies in both default and custom modes — anywhere the skill calls
+`query_gis_field`, this is the recovery path.
+
+## Custom Mode
+
+The defaults above (`fields-manifest.md`, fixed default sections, locked
+visual styling) describe the **address-only** invocation. When the user
+signals they want a custom render, the manifest no longer constrains
+content and the upload becomes the design source-of-truth.
+
+### Triggers (any of)
+
+- The user attached an image, PDF, or screenshot in the message.
+- The user said "match this design", "match this OM", "use these fields",
+  "custom render", "like this layout", or named specific non-default
+  fields/sections.
+
+If only an address is supplied with no design instruction and no upload,
+run defaults. If an upload is present, treat as custom — the upload
+signals intent.
+
+### Behavior
+
+- Vision-extract layout cues (sections present, palette, type hierarchy,
+  header treatment, section order) from the upload. Treat the upload as
+  the design source-of-truth; the locked styling in `layout.md §6a`
+  becomes a *default* the upload may override.
+- `references/fields-manifest.md` does **not** constrain content. Any
+  user-named field still routes through `search_real_estate_data`
+  discovery before `query_gis_field` (R13).
+- The poison-pill fallback in `data-spec.md §Block Acquisition Step 2`
+  **still applies** whenever `query_gis_field` is used. Custom mode
+  benefits from it for free.
+
+### Hard rules that still hold
+
+- O1 PDF-first output.
+- O2 the rendered page never mentions missing data, failed calls, or
+  dropped modules.
+- O3 never fabricate a value to fill a cell.
+- R5 / O4 no Tapestry anywhere on the page.
+- R10 no qualitative analysis beyond the numbers.
 
 ## Quick Reference
 
@@ -138,6 +203,8 @@ Details in `data-spec.md §Optional Modules`.
 | "OM for <address>, include risk and schools" | Default + Risk + Schools modules. |
 | "OM for <address>, HTML only" | HTML-only output, skip PDF conversion. |
 | "Full OM for <address> with everything" | Default + all opt-in modules. |
+| User uploads a screenshot or OM PDF along with the address | Custom Mode — upload is the design reference; manifest does not constrain content. |
+| "Match this design / layout" / "use these fields" | Custom Mode. |
 
 ## What this skill deliberately does NOT do
 

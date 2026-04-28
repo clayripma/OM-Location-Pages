@@ -282,6 +282,10 @@
   .occ-bar__seg--3 { background: #21493B; }
   .occ-bar__seg--4 { background: #15332A; }
   .occ-bar__seg--muted { background: var(--neutral-chip); color: var(--muted); }
+  /* Hide segment labels in narrow segments to prevent overlap (layout.md §3.4).
+     Render-time: add `.is-narrow` to any `.occ-bar__seg` whose pct < 8. */
+  .occ-bar__seg.is-narrow .occ-bar__label { display: none; }
+  .occ-bar__label { white-space: nowrap; }
 
   /* -------- Safety section (Block-Group raw counts only) -------------- */
   .block-crime {
@@ -786,37 +790,37 @@
       <div class="occ-bar-row">
         <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">Block</span>
         <div class="occ-bar">
-          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_BLOCK_PCT}}%">Mgmt {{OCC_MGMT_BLOCK_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_BLOCK_PCT}}%">Sales {{OCC_SALE_BLOCK_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_BLOCK_PCT}}%">Prod {{OCC_PROD_BLOCK_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_BLOCK_PCT}}%">Cons {{OCC_CONS_BLOCK_PCT}}%</div>
+          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_BLOCK_PCT}}%"><span class="occ-bar__label">Mgmt {{OCC_MGMT_BLOCK_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_BLOCK_PCT}}%"><span class="occ-bar__label">Sales {{OCC_SALE_BLOCK_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_BLOCK_PCT}}%"><span class="occ-bar__label">Prod {{OCC_PROD_BLOCK_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_BLOCK_PCT}}%"><span class="occ-bar__label">Cons {{OCC_CONS_BLOCK_PCT}}%</span></div>
         </div>
       </div>
       <div class="occ-bar-row">
         <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">Tract</span>
         <div class="occ-bar">
-          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_ZIP_PCT}}%">Mgmt {{OCC_MGMT_ZIP_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_ZIP_PCT}}%">Sales {{OCC_SALE_ZIP_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_ZIP_PCT}}%">Prod {{OCC_PROD_ZIP_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_ZIP_PCT}}%">Cons {{OCC_CONS_ZIP_PCT}}%</div>
+          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_ZIP_PCT}}%"><span class="occ-bar__label">Mgmt {{OCC_MGMT_ZIP_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_ZIP_PCT}}%"><span class="occ-bar__label">Sales {{OCC_SALE_ZIP_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_ZIP_PCT}}%"><span class="occ-bar__label">Prod {{OCC_PROD_ZIP_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_ZIP_PCT}}%"><span class="occ-bar__label">Cons {{OCC_CONS_ZIP_PCT}}%</span></div>
         </div>
       </div>
       <div class="occ-bar-row">
         <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">ZIP</span>
         <div class="occ-bar">
-          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_CITY_PCT}}%">Mgmt {{OCC_MGMT_CITY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_CITY_PCT}}%">Sales {{OCC_SALE_CITY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_CITY_PCT}}%">Prod {{OCC_PROD_CITY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_CITY_PCT}}%">Cons {{OCC_CONS_CITY_PCT}}%</div>
+          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_CITY_PCT}}%"><span class="occ-bar__label">Mgmt {{OCC_MGMT_CITY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_CITY_PCT}}%"><span class="occ-bar__label">Sales {{OCC_SALE_CITY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_CITY_PCT}}%"><span class="occ-bar__label">Prod {{OCC_PROD_CITY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_CITY_PCT}}%"><span class="occ-bar__label">Cons {{OCC_CONS_CITY_PCT}}%</span></div>
         </div>
       </div>
       <div class="occ-bar-row">
         <span class="label" style="color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:0.04em;">County</span>
         <div class="occ-bar">
-          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_COUNTY_PCT}}%">Mgmt {{OCC_MGMT_COUNTY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_COUNTY_PCT}}%">Sales {{OCC_SALE_COUNTY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_COUNTY_PCT}}%">Prod {{OCC_PROD_COUNTY_PCT}}%</div>
-          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_COUNTY_PCT}}%">Cons {{OCC_CONS_COUNTY_PCT}}%</div>
+          <div class="occ-bar__seg occ-bar__seg--1" style="flex-basis: {{OCC_MGMT_COUNTY_PCT}}%"><span class="occ-bar__label">Mgmt {{OCC_MGMT_COUNTY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--2" style="flex-basis: {{OCC_SALE_COUNTY_PCT}}%"><span class="occ-bar__label">Sales {{OCC_SALE_COUNTY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--3" style="flex-basis: {{OCC_PROD_COUNTY_PCT}}%"><span class="occ-bar__label">Prod {{OCC_PROD_COUNTY_PCT}}%</span></div>
+          <div class="occ-bar__seg occ-bar__seg--4" style="flex-basis: {{OCC_CONS_COUNTY_PCT}}%"><span class="occ-bar__label">Cons {{OCC_CONS_COUNTY_PCT}}%</span></div>
         </div>
       </div>
     </div>
@@ -879,7 +883,8 @@
 -->
 
 <script>
-  // Hero map — call with (lat, lng). If geocoding failed, this whole script + map div can be removed.
+  // Hero map — call with (lat, lng) sourced from `get_section_data` response payload (never estimated).
+  // If no coords are available even after a `search_real_estate_data("geocode")` fallback, the whole script + map div can be removed.
   window.addEventListener('load', function () {
     var el = document.getElementById('om-hero-map');
     if (!el) return;

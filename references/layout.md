@@ -66,9 +66,16 @@ Each metric = one horizontal strip:
 
 **Chip color — muted only.** Every chip uses the same neutral background (`--neutral-chip`) with muted text (`--muted`). No green, no red. The sign carries the direction; the reader's eye does the interpretation (R10 — no value judgments).
 
-**Presence is mandatory.** Every non-first-column value cell must have a chip. If both the cell's value and its left-neighbor's value are non-null, the chip renders. No skipping.
+**Presence rule.** Every non-first-column **current-value comparable**
+cell renders one chip when both the cell and its left-neighbor are
+non-null. Forecast rows (HHI 2029, HV 2029, Renter 2029) and raw-count
+rows (Renter units, Owner units, Per capita income) render values only
+— no chips. The chip carries cross-scale comparison; for a forecast or
+a raw count, the bare value is the signal.
 
-**Population Profile is the exception.** That section renders raw values only, no chips at all — the four-column spread alone carries the comparison.
+**Population Profile is the exception.** That section renders raw values
+only, no chips at all — the four-column spread alone carries the
+comparison.
 
 ### Omission rules (strict)
 
