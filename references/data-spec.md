@@ -15,6 +15,7 @@ Top of page. No cross-scale comparison.
 | Address (H1) | user-supplied | Exactly as given. NO eyebrow label above (no "Offering Memorandum", no "OM"). |
 | City, State · County · ZIP (locality line) | geocode lookup | |
 | Map | Leaflet + ESRI tile layer | **Default-on.** Remove the `.hero__map` div only if geocoding fails. |
+| Lat / Lng (for the map pin) | `get_section_data` response payload (most include `lat` / `lng`) | **Never estimate.** If no response surfaced coords, run a single `search_real_estate_data("geocode")` discovery step and use that. Surface into the template as `{{LAT}}` / `{{LNG}}`. |
 
 Not on the hero: Tapestry pill, safety pill. None of these are in the header by default.
 
@@ -38,7 +39,7 @@ Hard-coded slot contents — see `SKILL.md §O7`. Do NOT substitute.
 
 **Discovery:** `search_real_estate_data("Metropolitan Statistical Area")` once per session to confirm the layer URL and the MSA-name field (typical field names: `NAME`, `NAMELSAD`, or `MSA_NAME` — verify which one returns the full name string).
 
-**Query:** `query_gis_field(address, <layer>, ["NAME"])` (or whichever field the discovery call identifies). Use the returned string verbatim — do not truncate, do not rename, do not abbreviate.
+**Query:** `query_gis_field(address, <layer>, ["NAME"])` (or whichever field the discovery call identifies). Use the live string from `query_gis_field` verbatim — do not truncate, do not rename, do not abbreviate. Do NOT pre-fill MSA names from prior plans, training data, or cache; CBSA naming has changed over time and stale names will silently render.
 
 If the address is not inside any CBSA / MSA polygon (rural, outside metros), the slot is dropped (R9).
 
@@ -52,7 +53,7 @@ If the address is not inside any CBSA / MSA polygon (rural, outside metros), the
 |---|---|---|
 | Total population | `query_gis_field(TOTPOP_CY, /12)` — Tier 2 | `query_gis_field(TOTPOP_CY, /11 /9 /7)` |
 | Median age | `query_gis_field(MEDAGE_CY, /12)` — Tier 3 (drop cell if null) | same at `/11 /9 /7` |
-| Density (per sq mi) | Block blank (R9) | scales blank unless `search_real_estate_data("density")` surfaces a queryable field |
+| Density (per sq mi) | `query_gis_field(POPDENS_CY, /12)` — Tier 2 (manifest) | `query_gis_field(POPDENS_CY, /11 /9 /7)` |
 | 5-yr population growth (CAGR) | `get_section_data(address, "expansion").block` | `get_section_data(..., "expansion").tract/.zip/.county` |
 | Avg household size | `query_gis_field(AVGHHSZ_CY, /12)` — Tier 3 (drop if null) | same at `/11 /9 /7` |
 
@@ -78,7 +79,7 @@ If the address is not inside any CBSA / MSA polygon (rural, outside metros), the
 
 | OM label | Block source | Non-Block source |
 |---|---|---|
-| Median home value | `get_section_data("income").median_home_value.block` | `.tract/.zip`; `query_gis_field(MEDVAL_CY, /7)` for County |
+| Median home value | `get_section_data("income").median_home_value.block` | `.tract/.zip`; `query_gis_field(MEDVAL_CY, /7)` for County (manifest — survives the poison-pill fallback) |
 | HV 2029 (forecast) | `query_gis_field(MEDVAL_FY, /12)` — Tier X | same at `/11 /9 /7` |
 | 5-yr HV growth | compute `((MEDVAL_FY/MEDVAL_CY)^(1/5) − 1) × 100` — R11 gated | same at `/11 /9 /7` |
 
@@ -92,7 +93,7 @@ If median home value is 0 at every scale (industrial area with no residential st
 
 | OM label | Block source | Non-Block source |
 |---|---|---|
-| Median rent | `query_gis_field(MEDRENT_CY, /12)` — Tier X. Alt: `MEDCRNT_CY`. Drop if both null. | same at `/11 /9 /7` |
+| Median rent | `query_gis_field(MEDCRNT_CY, /12)` — Tier 2 (manifest; canonical "Median Contract Rent"). Drop if null. | `query_gis_field(MEDCRNT_CY, /11 /9 /7)` |
 | Renter units | `query_gis_field(RENTER_CY, /12)` Tier 3, drop if null | same at `/11 /9 /7` |
 | Owner units | `query_gis_field(OWNER_CY, /12)` Tier 3, drop if null | same at `/11 /9 /7` |
 | 2029 renter units | `query_gis_field(RENTER_FY, /12)` Tier X | same at `/11 /9 /7` |
@@ -164,28 +165,48 @@ No safety label pill in the hero. No ZIP/City/State crime-index comparison — V
 
 ---
 
-## Block Acquisition — one-shot parallel batch
+## Block Acquisition — fallback-aware parallel recipe
 
-For every OM, fire these in parallel (single turn):
+Field names come from `references/fields-manifest.md`. Do not hardcode
+field names here.
+
+### Step 1 — Per-scale safe batch (parallel, single turn)
+
+Fire all of these in parallel:
 
 1. `get_section_data(address, "income")` — Block HHI, home value, forecasted income growth (discovery)
 2. `get_section_data(address, "expansion")` — Block pop growth CAGR
 3. `get_section_data(address, "crime")` — Block Group crime counts
 4. `search_real_estate_data("Metropolitan Statistical Area")` — MSA layer + name field (once per session; cache)
 5. `query_gis_field(address, <MSA layer>, ["NAME"])` — MSA name for context band
-6. `query_gis_field(OCCMGMT_CY, OCCSALE_CY, OCCCOMP_CY, /12)`
-7. `query_gis_field(OCCEDUC_CY, OCCHLTH_CY, OCCCONS_CY, /12)`
-8. `query_gis_field(OCCFARM_CY, OCCPROD_CY, OCCTRAN_CY, /12)`
-9. `query_gis_field(OCCFOOD_CY, OCCPROT_CY, OCCPERS_CY, /12)`
-10. `query_gis_field(OCCBLDG_CY, EMP_CY, UNEMP_CY, /12)`
-11. `query_gis_field(TOTPOP_CY, TOTHH_CY, UNEMPRT_CY, /12)`
-12. `query_gis_field(MEDAGE_CY, AVGHHSZ_CY, PCI_CY, /12)`
-13. `query_gis_field(MEDHINC_FY, MEDVAL_FY, RENTER_FY, /12)`
-14. `query_gis_field(MHIGRWCYFY, /12)` — R13 verification of income growth CAGR
-15. `query_gis_field(RENTER_CY, OWNER_CY, MEDRENT_CY, /12)`
+6. For each of the four scales (`/12 /11 /9 /7`), one `query_gis_field`
+   call carrying *every* `demographics_2024` field listed in the manifest
+   that's marked queryable at that scale. One call per scale, four
+   scales total.
 
-Also run queries 6–15 at `/11`, `/9`, `/7` in the same parallel batch. That's ~40 calls in one turn — fire them all. F6: VestMap is unlimited.
+Opt-in modules add their specified queries to the same parallel batch.
 
-Opt-in modules: add their specified queries to the parallel batch.
+### Step 2 — Poison-pill fallback (only when needed)
 
-**Failure handling:** if any of these returns null, skip that cell silently. Never mention which ones missed.
+`query_gis_field` is **all-or-nothing on the field list** — one bad name
+or one null value nukes the whole batch with the misleading error
+`"No data found at … may be outside this layer's coverage area"`. That
+string is **not** a coverage signal. See `SKILL.md §Gotchas`.
+
+If a scale's batch from Step 1 returns "No data found":
+
+1. Re-issue that scale as **one `query_gis_field` call per manifest field,
+   in parallel** (a per-field probe). 4-scale × ~20-field worst case
+   ≈ 80 probes; F6 — VestMap is unlimited, fire them.
+2. Drop fields whose probe returns null or "No data found". Keep the
+   rest. Never bisect manually.
+3. Never surface the failure to chat or to the rendered page (O2).
+
+The fallback runs the same way in custom mode — any time the skill calls
+`query_gis_field`, this is the recovery path.
+
+### Step 3 — R9 sweep
+
+Whatever survives Steps 1-2 flows into the template. Null cells get
+`display:none`; rows with <2 non-null cells are removed; sections with
+<2 rows are removed. No placeholder text anywhere (O2).
