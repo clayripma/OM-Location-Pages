@@ -43,13 +43,19 @@ All comparisons use **Block Group / Tract / ZIP Code** geographic levels — not
 
 ## Installation
 
+Clone the repo directly into your Claude Code skills directory:
+
 ```bash
-git clone https://github.com/clayripma/om-location-pages.git
-cd om-location-pages
-claude
+git clone https://github.com/clayripma/OM-Location-Pages.git ~/.claude/skills/vestmap-om-pages
 ```
 
-Then run `/vestmap-om-pages` to generate a page.
+Then restart Claude Code and run `/vestmap-om-pages` to generate a page.
+
+To update later:
+
+```bash
+cd ~/.claude/skills/vestmap-om-pages && git pull
+```
 
 ## About VestMap
 
