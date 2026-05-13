@@ -179,12 +179,38 @@ signals intent.
   header treatment, section order) from the upload. Treat the upload as
   the design source-of-truth; the locked styling in `layout.md §6a`
   becomes a *default* the upload may override.
+- The upload may override **styling** (palette, type, section order,
+  header treatment). It may NOT override the canonical scale set
+  (Block · Tract · ZIP · County) or the default-on hero map — see
+  "Scale translation" below and O8.
 - `references/fields-manifest.md` does **not** constrain content. Any
   user-named field still routes through `search_real_estate_data`
   discovery before `query_gis_field` (R13).
 - The poison-pill fallback in `data-spec.md §Block Acquisition Step 2`
   **still applies** whenever `query_gis_field` is used. Custom mode
   benefits from it for free.
+
+### Scale translation (radial rings → canonical scales)
+
+VestMap data is queried only at Block (`/12`), Tract (`/11`), ZIP
+(`/9`), and County (`/7`). Radial-ring scales (1/3/5 mile, 0.5/1/3
+mile, drive-time isochrones, etc.) are **not** supported by the data
+layer — there is no mile-radius API.
+
+If the upload labels its comparison columns with mile-radii or other
+radial rings, translate them to the canonical scale set:
+
+| Upload columns                  | Render as                       |
+|---------------------------------|---------------------------------|
+| 2 rings (e.g. 1 / 3 mi)         | Tract · ZIP                     |
+| 3 rings (e.g. 1 / 3 / 5 mi)     | Block · Tract · ZIP             |
+| 4 rings (e.g. 1 / 3 / 5 / 10)   | Block · Tract · ZIP · County    |
+
+Preserve everything else from the upload (palette, type, section order,
+header treatment, comparison patterns like "vs County" deviation
+chips). Only the column labels change. Never display or query a
+mile-radius column — route every column through `query_gis_field` at
+`/12 /11 /9 /7` as usual.
 
 ### Hard rules that still hold
 
@@ -193,6 +219,10 @@ signals intent.
   dropped modules.
 - O3 never fabricate a value to fill a cell.
 - R5 / O4 no Tapestry anywhere on the page.
+- O8 the Leaflet+ESRI hero map renders unless geocoding fails — even
+  if the upload shows a map placeholder, a grey box, radio-button ring
+  selector, or no map at all. The map is a feature, not a styling
+  token, and is not overridable by the upload.
 - R10 no qualitative analysis beyond the numbers.
 
 ## Quick Reference
