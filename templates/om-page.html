@@ -54,8 +54,10 @@
     padding: var(--pad-page);
     page-break-after: always;
     background: var(--surface);
+    overflow: hidden;
   }
   .page:last-of-type { page-break-after: auto; }
+  .page > * { max-width: 100%; box-sizing: border-box; }
 
   /* -------- Page-header strip (layout.md §Styling) --------------------- */
   .page-header {
@@ -80,18 +82,24 @@
     line-height: 1.3;
   }
 
-  /* -------- Summary/map row (two-up) ---------------------------------- */
+  /* -------- Summary/map row (two-up) ----------------------------------
+     When the map div is removed (geocoding failed), the script adds
+     `.no-map` to .summary-row so the summary card spans the full width
+     instead of leaving an empty right column (the page would otherwise
+     read as "off center"). See layout.md §3.1.                         */
   .summary-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.24in;
     margin-top: 0.22in;
   }
+  .summary-row.no-map { grid-template-columns: 1fr; }
   .summary-card {
     background: var(--surface-alt);
     border-radius: 6px;
     border-left: 3px solid var(--accent);
     padding: 14pt 12pt;
+    min-width: 0;
   }
   .summary-card__row {
     display: flex;
@@ -885,26 +893,61 @@
 <script>
   // Hero map — call with (lat, lng) sourced from `get_section_data` response payload (never estimated).
   // If no coords are available even after a `search_real_estate_data("geocode")` fallback, the whole script + map div can be removed.
-  window.addEventListener('load', function () {
-    var el = document.getElementById('om-hero-map');
-    if (!el) return;
-    var lat = parseFloat('{{LAT}}');
-    var lng = parseFloat('{{LNG}}');
-    if (isNaN(lat) || isNaN(lng)) {
-      el.parentNode.removeChild(el);
-      return;
+  //
+  // Headless-Chrome PDF capture timing:
+  //   The Leaflet tile layer fetches PNGs from ArcGIS over the network. Chrome's
+  //   --virtual-time-budget only advances JS timers; it does NOT wait for real
+  //   network responses, so a naive map init prints a blank tile grid.
+  //   We mark the document with `data-map-ready="true"` (and add `.map-ready` to
+  //   <html>) once the initial visible tiles have rendered — the PDF export
+  //   command waits for this attribute before printing. See layout.md §9.
+  //   If the map div is missing OR coords are bad, we mark ready immediately so
+  //   the export doesn't stall.
+  (function () {
+    var root = document.documentElement;
+    function markReady() {
+      if (root.dataset.mapReady === 'true') return;
+      root.dataset.mapReady = 'true';
+      root.classList.add('map-ready');
     }
-    var map = L.map('om-hero-map', {
-      scrollWheelZoom: false,
-      dragging: false,
-      zoomControl: false
-    }).setView([lat, lng], 13);
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-      { attribution: 'Tiles &copy; Esri', maxZoom: 19 }
-    ).addTo(map);
-    L.marker([lat, lng]).addTo(map);
-  });
+    // Hard ceiling — never block the print past this point even if a tile hangs.
+    var FAILSAFE_MS = 12000;
+    setTimeout(markReady, FAILSAFE_MS);
+
+    window.addEventListener('load', function () {
+      var el = document.getElementById('om-hero-map');
+      if (!el) { markReady(); return; }
+      var lat = parseFloat('{{LAT}}');
+      var lng = parseFloat('{{LNG}}');
+      if (isNaN(lat) || isNaN(lng)) {
+        // Geocoding failed — drop the map cell and collapse the row to a single
+        // column so the summary card spans full width (prevents off-center page).
+        var row = el.closest('.summary-row');
+        if (row) row.classList.add('no-map');
+        el.parentNode.removeChild(el);
+        markReady();
+        return;
+      }
+      if (typeof L === 'undefined') { markReady(); return; }
+      var map = L.map('om-hero-map', {
+        scrollWheelZoom: false,
+        dragging: false,
+        zoomControl: false,
+        fadeAnimation: false,
+        zoomAnimation: false
+      }).setView([lat, lng], 13);
+      var tiles = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        { attribution: 'Tiles &copy; Esri', maxZoom: 19, crossOrigin: true }
+      ).addTo(map);
+      L.marker([lat, lng]).addTo(map);
+      tiles.on('load', function () {
+        // Give the compositor one frame to paint the freshly-loaded tiles
+        // before signaling ready.
+        requestAnimationFrame(function () { requestAnimationFrame(markReady); });
+      });
+    });
+  })();
 </script>
 
 </body>

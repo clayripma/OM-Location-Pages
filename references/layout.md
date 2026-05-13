@@ -98,7 +98,9 @@ At the top of each 4-col section: `Block · Tract · ZIP · County`. Same header
 Top of page 1 has two horizontal bands:
 
 1. **Page-header strip** — full-bleed dark-green band (`background: var(--accent)`, `color:#fff`), ~1.4" tall. Contains uppercase label `LOCATION BRIEF` (28pt/700, letter-spacing 0.02em) and, directly below it, the address in 13pt/400 at 85% opacity white. Nothing else. See §Styling.
-2. **Two-up row** — immediately below the header strip: summary table on the left (locality line + any subject-level identifiers the template surfaces), Leaflet + ESRI map on the right in a neutral card. If geocoding fails the `.hero__map` div is removed and the summary card spans both columns.
+2. **Two-up row** — immediately below the header strip: summary table on the left (locality line + any subject-level identifiers the template surfaces), Leaflet + ESRI map on the right in a neutral card. If geocoding fails the `.hero__map` div is removed AND the template's map script adds `.no-map` to `.summary-row`, collapsing it to a single column so the summary card spans the full width. Never leave the right column empty — the page reads as "off center" if you do.
+
+**Map-ready signal (PDF capture timing).** The template script sets `document.documentElement.dataset.mapReady = 'true'` once the initial visible tile batch has rendered (via `L.TileLayer`'s `load` event, debounced by two `requestAnimationFrame` calls so the compositor has a frame to paint). It also fires the same signal immediately if geocoding fails or Leaflet is missing, and a hard 12-second failsafe is set on page load so the export can never stall forever. The headless-Chrome export waits for this attribute before snapshotting — without it, the PDF captures a blank tile grid. See §9.
 
 **Header strip must NOT contain:** "Offering Memorandum" or any document-type label; Tapestry pill / segment name; safety label pill.
 
@@ -290,23 +292,46 @@ vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.html
 
 ### Step 2 — Convert to PDF with headless Chrome
 
-Use the Chrome binary installed at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. The Bash command:
+Use the locally-installed Chrome / Chromium binary. On macOS this is
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. On Linux it's
+typically `google-chrome`, `google-chrome-stable`, or `chromium`. Pick whichever
+exists (`command -v google-chrome || command -v chromium || command -v chromium-browser`).
 
 ```bash
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-  --headless \
+  --headless=new \
   --disable-gpu \
+  --no-sandbox \
+  --hide-scrollbars \
   --no-pdf-header-footer \
-  --virtual-time-budget=10000 \
+  --run-all-compositor-stages-before-draw \
+  --virtual-time-budget=20000 \
+  --print-to-pdf-no-header \
   --print-to-pdf="vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.pdf" \
   "file:///absolute/path/to/vestmap-om-{zip}-{YYYYMMDD-HHMMSS}.html"
 ```
 
 Notes:
-- `--virtual-time-budget=10000` gives Leaflet 10 seconds to load tiles and the map marker before printing. Without this, the map renders blank.
+- `--virtual-time-budget=20000` is the upper bound; the template fires a `data-map-ready="true"` attribute on `<html>` once Leaflet's initial tile batch has rendered (or 12s have elapsed without it). The budget exists only as a safety net — it is intentionally larger than the in-page failsafe so the JS path always wins.
+- `--run-all-compositor-stages-before-draw` forces Chrome to flush the compositor before snapshotting. Without it, freshly-loaded tile PNGs are sometimes captured mid-paint as a blank/grey tile grid even when `tilelayer.on('load')` has fired. **This is the single most important flag for getting the map into the PDF reliably.**
+- `--headless=new` uses the modern headless renderer, which paints external image resources more deterministically than the legacy `--headless` mode.
 - `--no-pdf-header-footer` kills Chrome's default "page 1 of N" and URL footer.
-- `--disable-gpu` is required on headless-macOS.
+- `--disable-gpu` is required on headless-macOS; harmless elsewhere.
+- `--no-sandbox` allows running as root in a CI / container environment; safe to drop on a normal workstation.
 - Use `file://` scheme with the absolute path, not a relative path.
+
+#### Verifying the map actually rendered
+
+After the PDF is written, do a quick sanity check before responding:
+
+```bash
+# PDF should be ≥ ~80 KB once the map tiles are baked in. A blank-map PDF is
+# typically 15–35 KB. If it comes in under 60 KB, re-run the export once.
+[ "$(stat -f%z out.pdf 2>/dev/null || stat -c%s out.pdf)" -lt 60000 ] && echo "RETRY"
+```
+
+If the second attempt is still tiny, fall through to HTML-only and tell the user
+the map didn't bake — do NOT silently ship a PDF with a blank tile area.
 
 ### Step 3 — Clean up
 
