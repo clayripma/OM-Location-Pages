@@ -891,8 +891,14 @@
 -->
 
 <script>
-  // Hero map — call with (lat, lng) sourced from `get_section_data` response payload (never estimated).
-  // If no coords are available even after a `search_real_estate_data("geocode")` fallback, the whole script + map div can be removed.
+  // Hero map — lat/lng are sourced EXCLUSIVELY through VestMap MCP per
+  // `SKILL.md §O8a`: primary path is the `get_section_data` response payload,
+  // fallback is one `search_real_estate_data("geocode")` discovery. No external
+  // geocoders (Nominatim, geocode.arcgis.com, Google, Mapbox), no urllib /
+  // requests / curl / web_fetch / fetch. If both VestMap paths return nothing,
+  // hand the template empty {{LAT}}/{{LNG}} — this script then removes the
+  // map div, adds `.no-map` to `.summary-row`, and signals `mapReady` so the
+  // PDF export doesn't stall.
   //
   // Headless-Chrome PDF capture timing:
   //   The Leaflet tile layer fetches PNGs from ArcGIS over the network. Chrome's

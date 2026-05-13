@@ -15,7 +15,16 @@ Top of page. No cross-scale comparison.
 | Address (H1) | user-supplied | Exactly as given. NO eyebrow label above (no "Offering Memorandum", no "OM"). |
 | City, State · County · ZIP (locality line) | geocode lookup | |
 | Map | Leaflet + ESRI tile layer | **Default-on.** Remove the `.hero__map` div only if geocoding fails. |
-| Lat / Lng (for the map pin) | `get_section_data` response payload (most include `lat` / `lng`) | **Never estimate.** If no response surfaced coords, run a single `search_real_estate_data("geocode")` discovery step and use that. Surface into the template as `{{LAT}}` / `{{LNG}}`. |
+
+### Lat / Lng (map pin)
+
+**VestMap MCP only — see `SKILL.md §O8a`.** Acquisition order:
+
+1. Extract `lat` / `lng` from any `get_section_data(address, ...)` response already in scope (`income`, `expansion`, `crime` — at least one normally surfaces them).
+2. If still missing, `search_real_estate_data("geocode")` to discover the geocoding service, then `query_gis_field` against that service for the subject address.
+3. If still missing, drop the map cell — the template script removes `.hero__map` and adds `.no-map` to `.summary-row` so the summary card spans full width. Ship the OM without a map.
+
+Surface the result into the template as `{{LAT}}` / `{{LNG}}`. **Never estimate** and **never call an external geocoder** (Nominatim, ArcGIS World Geocoder, Google, Mapbox, etc.). **Never use** `urllib` / `requests` / `curl` / `wget` / `web_fetch` / browser `fetch` to acquire coords — the sandbox blocks them and the map fails silently. The right answer when VestMap MCP can't produce coords is step 3, not an outside retry.
 
 Not on the hero: Tapestry pill, safety pill. None of these are in the header by default.
 

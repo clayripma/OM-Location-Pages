@@ -80,6 +80,14 @@ Do NOT substitute. Do NOT add a crime / safety / risk callout to the header. Do 
 
 **O8. Map is default-on.** Every OM has the Leaflet+ESRI hero map rendered unless geocoding literally fails (in which case the `.hero__map` div is removed). Do not make the user opt in to the map.
 
+**O8a. Geocoding policy — VestMap MCP only.** Lat/lng for the hero map come exclusively from VestMap MCP responses. Acquisition order:
+
+1. **Primary.** Every `get_section_data(address, ...)` response normally surfaces `lat` / `lng` (or equivalent) in the payload. Read it from whichever section call you've already fired (`income`, `expansion`, `crime`) — you don't need an additional call.
+2. **Fallback.** If no surfaced coords, run `search_real_estate_data("geocode")` once to discover the geocoding feature service, then `query_gis_field` against that service to pull the coords for the subject address.
+3. **Failure.** If both 1 and 2 return nothing, the template script removes the `.hero__map` div and adds `.no-map` to `.summary-row` so the summary card spans the full width. **That is the only fallback.** The OM ships without a map.
+
+**Forbidden, no exceptions:** external HTTPS geocoders (`nominatim.openstreetmap.org`, `geocode.arcgis.com`, Google Maps, Mapbox, anything else); `python3 urllib` / `requests` / `curl` / `wget` shell-outs to any geocoder; `mcp__workspace__web_fetch` for coords; browser `fetch`; any path that leaves the VestMap MCP. The sandbox blocks them and the only outcome is wasted turns plus no map. If VestMap MCP can't surface coords, ship the OM without a map (per O8) — do NOT reach outside.
+
 **O9. Self-contained HTML before PDF conversion.** All CSS inline. The only external asset is the Leaflet CDN + ESRI tile layer. Before you open the HTML in headless Chrome to export the PDF, the HTML must be able to open standalone in a browser.
 
 **O10a. Every number must trace to a VestMap tool call.** If you cannot name the specific VestMap tool call (`get_section_data`, `query_gis_field`, or `search_real_estate_data`) that produced a value, that value does not appear on the page. No exceptions, no inference, no filling in from memory.
