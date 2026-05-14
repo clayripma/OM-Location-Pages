@@ -1,3 +1,19 @@
+> **This skill has moved.** VestMap's skills are now distributed together as a single
+> Claude Code plugin from the **[VestMap marketplace](https://github.com/VestMap-App/marketplace)**.
+> Install both the `vestmap` and `vestmap-om-pages` skills with two commands inside
+> Claude Code:
+>
+> ```
+> /plugin marketplace add VestMap-App/marketplace
+> /plugin install vestmap@vestmap-app
+> ```
+>
+> This repository is kept as a reference archive. For full, step-by-step setup
+> instructions, see the
+> [marketplace README](https://github.com/VestMap-App/marketplace#readme).
+
+---
+
 # OM Location Pages
 
 Generate presentation-ready Offering Memorandum (OM) location pages from any US address using Claude Code and VestMap.
